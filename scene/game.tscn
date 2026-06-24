@@ -5,10 +5,16 @@
 [ext_resource type="PackedScene" uid="uid://dnfa7mjnlnxhk" path="res://scene/view/chapter_select_view.tscn" id="2_wb370"]
 [ext_resource type="PackedScene" uid="uid://68j1ks88y8qg" path="res://scene/view/game_view.tscn" id="3_jnk0y"]
 [ext_resource type="PackedScene" uid="uid://brqss137fqre" path="res://scene/ui/button_ring.tscn" id="5_kflyq"]
+[ext_resource type="PackedScene" uid="uid://c8n5p2law7r4t" path="res://scene/view/save_load_view.tscn" id="9_svl"]
+[ext_resource type="PackedScene" uid="uid://dq7w3n5h8x2ke" path="res://scene/view/settings_view.tscn" id="9_set"]
+[ext_resource type="PackedScene" uid="uid://dvxqj3k2m5g7w" path="res://scene/ui/confirm_dialog.tscn" id="9_cfrm"]
+[ext_resource type="PackedScene" uid="uid://dn4q6h3w8s2k1" path="res://scene/ui/notify_toast.tscn" id="9_ntfy"]
+[ext_resource type="PackedScene" uid="uid://b7t2x9k4p1m3w" path="res://scene/view/backlog_view.tscn" id="9_blv"]
 [ext_resource type="Script" path="res://nova/sources/scripts/ObjectBinder.cs" id="5_uri73"]
-
-[sub_resource type="ViewportTexture" id="ViewportTexture_3lxvl"]
-viewport_path = NodePath("World/MainViewport")
+[ext_resource type="Script" path="res://nova/sources/scripts/audio/AudioPlayerController.cs" id="6_audplr"]
+[ext_resource type="Script" path="res://nova/sources/scripts/audio/SoundController.cs" id="6_sndctl"]
+[ext_resource type="Script" path="res://nova/sources/scripts/graphics/CompositeSpriteController.cs" id="7_cmpsp"]
+[ext_resource type="Script" path="res://nova/sources/scripts/graphics/AvatarController.cs" id="8_avtctl"]
 
 [node name="NovaController" type="Node"]
 script = ExtResource("1_m66ij")
@@ -29,15 +35,30 @@ layout_mode = 1
 visible = false
 layout_mode = 1
 
-[node name="GameView" parent="Canvas" node_paths=PackedStringArray("_buttonRingTrigger") instance=ExtResource("3_jnk0y")]
+[node name="GameView" parent="Canvas" node_paths=PackedStringArray("_buttonRingTrigger", "_mainViewport") instance=ExtResource("3_jnk0y")]
 visible = false
 layout_mode = 1
 _buttonRingTrigger = NodePath("../ButtonRing")
-
-[node name="Game" parent="Canvas/GameView" index="0"]
-texture = SubResource("ViewportTexture_3lxvl")
+_mainViewport = NodePath("../../World/MainViewport")
 
 [node name="ButtonRing" parent="Canvas" instance=ExtResource("5_kflyq")]
+layout_mode = 1
+
+[node name="SaveLoadView" parent="Canvas" instance=ExtResource("9_svl")]
+visible = false
+layout_mode = 1
+
+[node name="SettingsView" parent="Canvas" instance=ExtResource("9_set")]
+visible = false
+layout_mode = 1
+
+[node name="BacklogView" parent="Canvas" instance=ExtResource("9_blv")]
+visible = false
+layout_mode = 1
+
+[node name="ConfirmDialog" parent="Canvas" instance=ExtResource("9_cfrm")]
+
+[node name="NotifyToast" parent="Canvas" instance=ExtResource("9_ntfy")]
 layout_mode = 1
 
 [node name="World" type="Node3D" parent="."]
@@ -48,13 +69,30 @@ visible = false
 script = ExtResource("5_uri73")
 _bindName = "bg"
 
+[node name="Cg" type="Sprite3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+visible = false
+script = ExtResource("5_uri73")
+_bindName = "cg"
+
 [node name="Foreground" type="Sprite3D" parent="World"]
 visible = false
 script = ExtResource("5_uri73")
 _bindName = "fg"
 
+[node name="MidLayer" type="Sprite3D" parent="World"]
+visible = false
+script = ExtResource("5_uri73")
+_bindName = "mid"
+
+[node name="NearLayer" type="Sprite3D" parent="World"]
+visible = false
+script = ExtResource("5_uri73")
+_bindName = "near"
+
 [node name="MainViewport" type="SubViewport" parent="World"]
 size = Vector2i(1920, 1080)
+render_target_update_mode = 4
 
 [node name="MainCamera" type="Camera3D" parent="World/MainViewport"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
@@ -62,6 +100,67 @@ projection = 1
 size = 10.8
 script = ExtResource("5_uri73")
 _bindName = "cam"
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="Bgm" type="Node" parent="Audio" node_paths=PackedStringArray("_player")]
+script = ExtResource("6_audplr")
+_bindName = "bgm"
+_audioFolder = "bgm"
+_loop = true
+_player = NodePath("Player")
+
+[node name="Player" type="AudioStreamPlayer" parent="Audio/Bgm"]
+bus = &"Bgm"
+
+[node name="Bgs" type="Node" parent="Audio" node_paths=PackedStringArray("_player")]
+script = ExtResource("6_audplr")
+_bindName = "bgs"
+_audioFolder = "sound"
+_loop = true
+_player = NodePath("Player")
+
+[node name="Player" type="AudioStreamPlayer" parent="Audio/Bgs"]
+bus = &"Bgs"
+
+[node name="Voice" type="Node" parent="Audio" node_paths=PackedStringArray("_player")]
+script = ExtResource("6_audplr")
+_bindName = "voice"
+_audioFolder = "voice"
+_loop = false
+_player = NodePath("Player")
+
+[node name="Player" type="AudioStreamPlayer" parent="Audio/Voice"]
+bus = &"Voice"
+
+[node name="Sound" type="Node" parent="Audio"]
+script = ExtResource("6_sndctl")
+_audioFolder = "sound"
+
+[node name="Characters" type="Node3D" parent="World"]
+
+[node name="Ergong" type="Node3D" parent="World/Characters"]
+script = ExtResource("7_cmpsp")
+_bindName = "ergong"
+_imageFolder = "Ergong"
+
+[node name="Gaotian" type="Node3D" parent="World/Characters"]
+script = ExtResource("7_cmpsp")
+_bindName = "gaotian"
+_imageFolder = "Gaotian"
+
+[node name="Qianye" type="Node3D" parent="World/Characters"]
+script = ExtResource("7_cmpsp")
+_bindName = "qianye"
+_imageFolder = "Qianye"
+
+[node name="Xiben" type="Node3D" parent="World/Characters"]
+script = ExtResource("7_cmpsp")
+_bindName = "xiben"
+_imageFolder = "Xiben"
+
+[node name="Avatar" type="Node" parent="."]
+script = ExtResource("8_avtctl")
 
 [editable path="Canvas/GameView"]
 [editable path="Canvas/GameView/GameUI/DefaultDialogueBox"]

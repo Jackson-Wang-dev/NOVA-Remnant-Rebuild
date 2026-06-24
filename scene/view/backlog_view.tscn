@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://b7t2yak4p1m3w"]
+
+[ext_resource type="Script" path="res://nova/sources/scripts/ui/view/BacklogViewController.cs" id="1_blv"]
+[ext_resource type="PackedScene" uid="uid://dk3h8m2n5q1wt" path="res://scene/ui/backlog_entry.tscn" id="2_entry"]
+[ext_resource type="Theme" uid="uid://c12fchogq4o11" path="res://nova/resources/default_theme.tres" id="3_thm"]
+
+[node name="BacklogView" type="Control" node_paths=PackedStringArray("_scroll", "_list", "_backButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_blv")
+_scroll = NodePath("Scroll")
+_list = NodePath("Scroll/List")
+_entryScene = ExtResource("2_entry")
+_backButton = NodePath("BackButton")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="BackButton" type="Button" parent="."]
+custom_minimum_size = Vector2(140, 56)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -80.0
+offset_right = 164.0
+offset_bottom = -24.0
+grow_vertical = 0
+theme = ExtResource("3_thm")
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -700.0
+offset_top = -440.0
+offset_right = 700.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="List" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12

@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://68j1ks88y8qg"]
+[gd_scene load_steps=9 format=3 uid="uid://68j1ks88y8qg"]
 
 [ext_resource type="Script" path="res://nova/sources/scripts/ui/view/GameViewController.cs" id="1_y50ik"]
 [ext_resource type="Theme" uid="uid://c12fchogq4o11" path="res://nova/resources/default_theme.tres" id="2_wlcc6"]
 [ext_resource type="PackedScene" uid="uid://cfrhoyy70iyt1" path="res://scene/ui/dialogue_box.tscn" id="3_3befe"]
 [ext_resource type="Script" path="res://nova/sources/scripts/ui/PanelController.cs" id="3_fbjug"]
 [ext_resource type="Script" path="res://nova/sources/scripts/ui/game_view/ChoicesController.cs" id="5_efxj4"]
+[ext_resource type="Script" path="res://nova/sources/scripts/ObjectBinder.cs" id="6_vfxbn"]
+[ext_resource type="Script" path="res://nova/sources/scripts/video/VideoController.cs" id="7_video1"]
+[ext_resource type="Script" path="res://nova/sources/scripts/time_scroll/TimeScrollController.cs" id="8_timescroll1"]
 
 [node name="GameView" type="Control" node_paths=PackedStringArray("_gameUI")]
 layout_mode = 3
@@ -24,6 +27,120 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 stretch_mode = 2
+
+[node name="Video" type="VideoStreamPlayer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand = true
+script = ExtResource("7_video1")
+_bindName = "video"
+_videoFolder = "videos"
+
+[node name="TimeScroll" type="Control" parent="." node_paths=PackedStringArray("_displayLabel")]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_timescroll1")
+_bindName = "time_scroll"
+_displayLabel = NodePath("Label")
+
+[node name="Background" type="ColorRect" parent="TimeScroll"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Label" type="Label" parent="TimeScroll"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_wlcc6")
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VfxBackBuffer0" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="VfxLayer0" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_vfxbn")
+_bindName = "cam_vfx_0"
+
+[node name="VfxBackBuffer1" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="VfxLayer1" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_vfxbn")
+_bindName = "cam_vfx_1"
+
+[node name="VfxBackBuffer2" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="VfxLayer2" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_vfxbn")
+_bindName = "cam_vfx_2"
+
+[node name="VfxBackBuffer3" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="VfxLayer3" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_vfxbn")
+_bindName = "cam_vfx_3"
 
 [node name="Text" type="Label" parent="."]
 layout_mode = 1

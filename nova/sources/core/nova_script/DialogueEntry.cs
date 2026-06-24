@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Godot;
 
 namespace Nova;
@@ -15,6 +16,9 @@ public readonly struct LocalizedDialogueEntry()
 /// </summary>
 public readonly struct DialogueDisplayData()
 {
+    // Internal speaker name (DialogueEntry.CharacterName), not localized - used to key auto-voice
+    // lookups (AutoVoiceController), unlike DisplayNames which is locale-dependent text.
+    public string CharacterName { get; init; }
     public Dictionary<string, string> DisplayNames { get; init; }
     public Dictionary<string, string> Dialogues { get; init; }
 
@@ -71,19 +75,25 @@ public class DialogueEntry(string characterName, string displayName, string dial
     private DialogueDisplayData? _cachedDisplayData;
     private bool _needInterpolate;
 
+    private static readonly Regex s_interpolationToken = new(@"\{\{([^}]+)\}\}", RegexOptions.Compiled);
+
     public bool NeedInterpolate
     {
         get
         {
-            // TODO
             if (_cachedDisplayData == null && !_needInterpolate)
             {
-                _needInterpolate = false;
-                _cachedDisplayData = new DialogueDisplayData
+                _needInterpolate = _displayNames.Values.Any(s => s_interpolationToken.IsMatch(s)) ||
+                    _dialogues.Values.Any(s => s_interpolationToken.IsMatch(s));
+                if (!_needInterpolate)
                 {
-                    DisplayNames = _displayNames,
-                    Dialogues = _dialogues
-                };
+                    _cachedDisplayData = new DialogueDisplayData
+                    {
+                        CharacterName = CharacterName,
+                        DisplayNames = _displayNames,
+                        Dialogues = _dialogues
+                    };
+                }
             }
             return _needInterpolate;
         }
@@ -95,6 +105,7 @@ public class DialogueEntry(string characterName, string displayName, string dial
         {
             return new DialogueDisplayData
             {
+                CharacterName = CharacterName,
                 DisplayNames = _displayNames.ToDictionary(x => x.Key, x => InterpolateText(x.Value)),
                 Dialogues = _dialogues.ToDictionary(x => x.Key, x => InterpolateText(x.Value))
             };
@@ -116,9 +127,14 @@ public class DialogueEntry(string characterName, string displayName, string dial
 
     // TODO: async in gdscript
 
-    private static string InterpolateText(string s)
+    public static string InterpolateText(string s)
     {
-        // TODO
-        return s;
+        // Mirrors Lua's string.gsub: a replacement function returning nil/false keeps the original
+        // matched text, so an undefined variable leaves "{{name}}" untouched rather than blanking it.
+        return s_interpolationToken.Replace(s, m =>
+        {
+            var value = Variables.Instance.Get(m.Groups[1].Value);
+            return value.VariantType == Variant.Type.Nil ? m.Value : value.ToString();
+        });
     }
 }

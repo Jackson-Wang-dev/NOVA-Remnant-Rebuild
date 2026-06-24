@@ -1,0 +1,26 @@
+@<|
+label("test_video", "视频测试")
+is_unlocked_start()
+|>
+<|
+show("xiben", "normal", [0, -0.3, 0.53, 0, 0], 0)
+show("bg", "backgrounds/room")
+stop("bgm")
+set_box()
+|>
+测试视频
+
+<|
+video("demo_video")
+video_play()
+auto_step()
+|>
+显示视频(播完会自动跳到下一条,不需要点击)
+
+<|
+video_hide()
+|>
+隐藏视频
+
+测试结束
+@<| is_end() |>

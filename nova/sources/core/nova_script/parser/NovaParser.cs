@@ -209,20 +209,25 @@ public static class NovaParser
             }
 
             tokenizer.SkipWhiteSpace();
-            if (tokenizer.Peek.Type == TokenType.Comma || tokenizer.Peek.Type == TokenType.AttrEnd)
+            attributes.Add(UnQuote(key.Trim()), value == null ? null : UnQuote(value.Trim()));
+
+            // Must check AttrEnd before consuming it: ParseNext() advances past "]" itself, so
+            // peeking afterwards sees whatever follows the attribute list (e.g. "<|"'s BlockStart),
+            // not "]" - checking post-consumption here was the bug that made any non-empty
+            // attribute list (anything past the first key=value pair) never actually terminate.
+            if (tokenizer.Peek.Type == TokenType.AttrEnd)
+            {
+                tokenizer.ParseNext();
+                break;
+            }
+
+            if (tokenizer.Peek.Type == TokenType.Comma)
             {
                 tokenizer.ParseNext();
             }
             else
             {
                 throw new ParserException(tokenizer.Peek, "Expect , or ]");
-            }
-
-            attributes.Add(UnQuote(key.Trim()), value == null ? null : UnQuote(value.Trim()));
-
-            if (tokenizer.Peek.Type == TokenType.AttrEnd)
-            {
-                break;
             }
         }
 

@@ -22,5 +22,6 @@ layout_mode = 2
 layout_mode = 2
 mouse_filter = 2
 theme = ExtResource("1_jq1ly")
+bbcode_enabled = true
 fit_content = true
 scroll_active = false

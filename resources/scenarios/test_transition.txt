@@ -1,0 +1,46 @@
+@<|
+label("test_transition", "转场测试")
+is_unlocked_start()
+|>
+<|
+set_box()
+show("bg", "cg/rain_back")
+|>
+测试 trans 系列(Colorless 移植阶段 Phase B:trans/trans_fade/trans_left/right/up/down)
+
+<|
+trans_fade("bg", "foregrounds/moon_halo", 1.5)
+|>
+trans_fade:1.5 秒内整屏均匀淡入淡出(masks/gray + _Vague=0.5),从 rain_back 过渡到 moon_halo
+
+<|
+trans_left("bg", "cg/rain_back", 1.5)
+|>
+trans_left:从左到右擦除(masks/wipe_left),从 moon_halo 回到 rain_back
+
+<|
+trans_right("bg", "foregrounds/moon_halo", 1.5)
+|>
+trans_right:从右到左擦除(wipe_left + InvertMask),从 rain_back 到 moon_halo
+
+<|
+trans_up("bg", "cg/rain_back", 1.5)
+|>
+trans_up:从下到上擦除(masks/wipe_up),从 moon_halo 回到 rain_back
+
+<|
+trans_down("bg", "foregrounds/moon_halo", 1.5)
+|>
+trans_down:从上到下擦除(wipe_up + InvertMask),从 rain_back 到 moon_halo
+
+<|
+trans_fade("cam", func(): show("bg", "cg/rain_back"), 1.5)
+|>
+trans_fade(cam 路径):截屏当前画面为 _SubTex,回调里瞬间切换 bg 贴图,再用 layer 0 揭示——对照 ch1.txt 的 anim:trans_fade(cam, function() ... end, 2) 用法
+
+<|
+hide("bg")
+|>
+结束
+
+@<| is_end() |>

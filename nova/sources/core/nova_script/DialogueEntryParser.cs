@@ -18,6 +18,12 @@ public static class DialogueEntryParser
     private static readonly Regex MarkdownLinkPattern =
         new(@"\[([^\]]*)\]\(([^\)]*)\)", RegexOptions.Compiled);
 
+    private static readonly Regex MmrPattern =
+        new(@"<mmr>(?<mmr>.*?)</mmr>", RegexOptions.Compiled | RegexOptions.Singleline);
+
+    private static readonly Regex DmgPattern =
+        new(@"<dmg>(?<dmg>.*?)</dmg>", RegexOptions.Compiled | RegexOptions.Singleline);
+
     private const string StageKey = "stage";
 
     private static string GetStageName(DialogueActionStage stage)
@@ -65,6 +71,30 @@ public static class DialogueEntryParser
         text = MarkdownCodePattern.Replace(text, @"<style=Code>$1</style>");
         text = MarkdownLinkPattern.Replace(text, @"<link=""$2""><style=Link>$1</style></link>");
 
+        // Extract memory degradation variants, then strip tags from display text - ported from
+        // Nova1's DialogueEntryParser (HyBloom fork's MemoryTable/<mmr>/<dmg> tags, not upstream
+        // Colorless). The hash used to key MemoryTable.Variants below is the same GetChunkHash used
+        // for entry.TextHash, computed over the raw chunk (tags included), matching Nova1's textHash.
+        string mmrText = null;
+        var mmrMatch = MmrPattern.Match(text);
+        if (mmrMatch.Success)
+        {
+            mmrText = mmrMatch.Groups["mmr"].Value;
+        }
+
+        string dmgText = null;
+        var dmgMatch = DmgPattern.Match(text);
+        if (dmgMatch.Success)
+        {
+            dmgText = dmgMatch.Groups["dmg"].Value;
+        }
+
+        if (mmrText != null || dmgText != null)
+        {
+            text = MmrPattern.Replace(text, "");
+            text = DmgPattern.Replace(text, "");
+        }
+
         NovaParser.ParseNameDialogue(text, out var displayName, out var characterName,
             out var dialogue, hiddenNames);
 
@@ -89,7 +119,14 @@ public static class DialogueEntryParser
             }
         }
 
-        return new DialogueEntry(characterName, displayName, dialogue, actions, GetChunkHash(chunk));
+        var entry = new DialogueEntry(characterName, displayName, dialogue, actions, GetChunkHash(chunk));
+
+        if (mmrText != null || dmgText != null)
+        {
+            MemoryTable.Variants[entry.TextHash] = new MemoryTable.MemoryVariant(mmrText, dmgText);
+        }
+
+        return entry;
     }
 
     public static IReadOnlyList<DialogueEntry> ParseDialogueEntries(ParsedChunks chunks)

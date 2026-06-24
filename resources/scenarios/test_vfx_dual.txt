@@ -1,0 +1,67 @@
+@<|
+label("test_vfx_dual", "VFX测试5")
+is_unlocked_start()
+|>
+<|
+set_box()
+show("bg", "cg/rain_back")
+|>
+测试 VFX(M8 阶段5:双纹理/转场形态特效)。前三个用在 bg 上(spatial,Nova1 原版只生成 Default/Premul 变体,没有 PP,本来就不是给 cam 用的),后四个用在 cam 上(canvas_item)
+
+<|
+vfx("bg", "overlay", 1, 0)
+|>
+overlay:对 bg 自身贴图做一次"裁切到 [0,1] 范围"的直通采样,画面应该跟没加特效时完全一样(这个特效本身没有任何视觉变化,只是验证材质链路不报错、不黑屏)
+
+<|
+vfx("bg", null)
+vfx("bg", "change_texture_with_fade", 1, 2, { _PrimaryTex = "cg/rain_back", _SubTex = "foregrounds/moon_halo" })
+|>
+change_texture_with_fade:2 秒内从 cg/rain_back 交叉淡化到 foregrounds/moon_halo——跟 fade.gdshader 的整屏淡入淡出效果类似,但这个不支持遮罩擦除形状,只有纯交叉淡化(_Offsets 默认 0,两张图直接重叠淡化,不做位置偏移)
+
+<|
+vfx("bg", null)
+vfx("bg", "fade_global", 1, 2, { _PrimaryTex = "foregrounds/moon_halo", _SubTex = "cg/rain_back" })
+|>
+fade_global:跟上一步是同一段公式(Nova1 里这两个 shader 数学逻辑完全一样,只是单独命名的两个资源),这次反过来从 moon_halo 淡回 rain_back,验证两个独立 shader 文件各自都能正常工作
+
+<|
+vfx("bg", null)
+vfx("cam", "flip_grid", 1, 2, { _SubTex = "foregrounds/moon_halo", _GridSize = 80 })
+|>
+flip_grid:翻页式网格转场——画面应该被切成多个小方格,每个方格按对角线顺序依次"翻转"从当前画面切换到 moon_halo,不是均匀淡化,是逐格翻转的视觉效果
+
+<|
+vfx("cam", null)
+vfx("cam", "show_second_texture", 1, 0, { _SubTex = "foregrounds/moon_halo" })
+|>
+show_second_texture:无视 _T、无视当前画面,直接整屏显示 _SubTex(moon_halo)——这是最简单的"强制切换静态图"工具特效,瞬间生效(没有动画过渡这个概念)
+
+<|
+vfx("cam", null)
+vfx("cam", "mix_add", 1, 1, { _Mask = "foregrounds/moon_halo", _ColorMul = Color(1, 0.3, 0.3, 1) })
+|>
+mix_add:按 _Mask(借用 moon_halo 光晕)的红色通道强度,把 _ColorMul 指定的颜色(这里是红色调)按比例叠加进画面——光晕亮的区域应该被染红,暗区基本不受影响
+
+<|
+vfx("cam", null)
+vfx("cam", "rain", 1, 1, { _Size = 3 })
+|>
+rain(默认方向 _Angle=0):雨滴顺着"玻璃"往下流的折射效果(经典 shadertoy 雨滴算法移植)+ 高斯模糊背景,_Angle=0 应该是正常的"往下落",不应该再出现之前报告的"往上流"问题
+
+<|
+vfx("cam", "rain", 1, 1, { _Size = 3, _Density = 2.5, _Angle = 330, _Speed = 2.5 })
+|>
+rain 可调参数演示:_Density=2.5(密度变高,雨滴应该更密更小)、_Angle=330(基本向下、稍微偏右,像被风吹斜的雨,不是 225 那种不合常理的"向上飘")、_Speed=2.5(流速变快)——这三个是 Nova1 原版没有暴露的参数,这次按要求新增
+
+<|
+vfx("cam", null)
+|>
+清除特效,画面应完全恢复成最初的 cg/rain_back,没有任何残留扭曲
+
+<|
+hide("bg")
+|>
+结束
+
+@<| is_end() |>

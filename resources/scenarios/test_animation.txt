@@ -10,8 +10,12 @@ set_box()
 <|
 show("bg", "cg/rain_back")
 show("fg", "foregrounds/moon_halo", [0, 0, 0.2])
+show("mid", "foregrounds/moon_halo")
+move("mid", Vector3(-2, 1.2, -2), Vector3(0.4, 0.4, 0.4))
+show("near", "foregrounds/moon_halo")
+move("near", Vector3(2, -1.2, 3), Vector3(0.25, 0.25, 0.25))
 |>
-显示图片
+显示图片(额外加了 mid/near 两层,分别比 bg 更近、比 fg 更近,深度依次是 bg(-5) < mid(-2) < fg(0.2) < near(3),配合下面摄像机缩放测试用肉眼比较各深度的缩放比例)
 
 <|
 o.anim.PropertyVector3(o.fg, "position", Vector3(1, 1, 0), 0.5, false)  \
@@ -37,10 +41,53 @@ o.anim.PropertyVector3(o.fg, "position", Vector3(1, 1, 0), 0.5, false)  \
 移动之后再播放动画
 
 <|
+move("fg", [1, 1, 0.2, 0, 45], null, null, 1)
+tint("fg", [1, 1, 1, 0.3], 1)
+|>
+move 同时移动+旋转,tint 同时淡出,均 1 秒过渡
+
+<|
+move("fg", [0, 0, 0.2, 0, 0], null, null, 0.5)
+tint("fg", [1, 1, 1, 1], 0.5)
+|>
+还原,验证 duration 版本可逆、不影响后续瞬时调用
+
+<|
+o.anim.PropertyDouble(o.cam, "size", 14, 1, false)
+|>
+摄像机缩放(CameraSizeAnimationProperty 等价效果,验证 PropertyDouble 覆盖非 Sprite3D 目标;正交相机下 size 变化应该让 bg/mid/fg/near 四层按同一比例同时放大/缩小,跟各自的 z 深度无关——如果哪一层缩放比例明显不一样,说明实现有问题)
+
+<|
+o.anim.PropertyDouble(o.cam, "size", 10.8, 1, false)
+|>
+摄像机还原
+
+<|
+var a = o.anim.PropertyVector3(o.mid, "position", Vector3(2, 1.2, -2), 0.8, false)
+var b = a.PropertyVector3(o.mid, "scale", Vector3(0.7, 0.7, 0.7), 1.5, false)
+a.PropertyVector3(o.near, "position", Vector3(-2, -1.2, 3), 0.6, false)
+b.PropertyVector3(o.fg, "rotation_degrees", Vector3(0, 0, 90), 0.5, false)
+|>
+多段串并行序列(分叉再汇合):mid 先水平移动 0.8s(A);A 播完后 mid 缩放 1.5s(B)和 near 水平移动 0.6s(C)同时开始;fg 旋转 0.5s(D)挂在 B 下面,只在 B(长分支,缩放)播完才该开始——大约是 A 结束后 1.5s,不是 C(0.6s)结束那一刻。用秒表看:near 应该在 mid 还在慢慢放大缩放的时候就已经定位完毕、停在那里不动了;fg 必须等 mid 缩放完全停下来之后才开始转动——如果 fg 跟着 near 提前转动,说明并行分支汇合时错误地跟了短分支,是调度器 bug。
+
+<|
+set_text_appear(2, 4)
+o.anim.PropertyVector3(o.mid, "position", Vector3(-2, 1.2, -2), 3, false)
+|>
+演出 + 文本并行:这段文字每秒只蹦 4 个字,动画(mid 移动 3 秒)比念完这句话要慢——文字应该先念完,mid 还在继续移动。如果在文字还没念完、mid 也还没移动完的时候点一次,这次点击应该让文字立刻整段显示、mid 立刻跳到终点位置,两者同一次点击就一起停,不需要分两次点才都停下来;且这次点击本身不会跳到下一句,要再点一次才真正前进到下一条。
+
+<|
+set_text_appear()
+|>
+恢复默认(textappear=0),回到瞬间整段显示
+
+<|
 move("fg", [0, 0, 0.2, 0, 0])
 tint("fg", [1, 1, 1, 1])
 hide("bg")
 hide("fg")
+hide("mid")
+hide("near")
 |>
 结束
 

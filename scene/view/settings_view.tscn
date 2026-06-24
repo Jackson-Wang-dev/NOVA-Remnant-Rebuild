@@ -1,0 +1,181 @@
+[gd_scene format=3 uid="uid://dq7w3n5h8x2ke"]
+
+[ext_resource type="Script" path="res://nova/sources/scripts/ui/view/SettingsController.cs" id="1_set"]
+[ext_resource type="Theme" uid="uid://c12fchogq4o11" path="res://nova/resources/default_theme.tres" id="2_thm"]
+[ext_resource type="Script" path="res://nova/sources/scripts/ui/i18n/I18nText.cs" id="3_i18n"]
+
+[node name="SettingsView" type="Control" node_paths=PackedStringArray("_masterSlider", "_bgmSlider", "_bgsSlider", "_voiceSlider", "_sfxSlider", "_backButton", "_returnTitleButton", "_quitButton")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_set")
+_masterSlider = NodePath("Box/Master/Slider")
+_bgmSlider = NodePath("Box/Bgm/Slider")
+_bgsSlider = NodePath("Box/Bgs/Slider")
+_voiceSlider = NodePath("Box/Voice/Slider")
+_sfxSlider = NodePath("Box/Sfx/Slider")
+_backButton = NodePath("BackButton")
+_returnTitleButton = NodePath("Footer/ReturnTitleButton")
+_quitButton = NodePath("Footer/QuitButton")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="BackButton" type="Button" parent="."]
+custom_minimum_size = Vector2(140, 56)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -80.0
+offset_right = 164.0
+offset_bottom = -24.0
+grow_vertical = 0
+theme = ExtResource("2_thm")
+
+[node name="Box" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -260.0
+offset_right = 350.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 28
+
+[node name="Master" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Label" type="Label" parent="Box/Master"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme = ExtResource("2_thm")
+script = ExtResource("3_i18n")
+InflateTextKey = "config.item.volume.global"
+
+[node name="Slider" type="HSlider" parent="Box/Master"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Bgm" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Label" type="Label" parent="Box/Bgm"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme = ExtResource("2_thm")
+script = ExtResource("3_i18n")
+InflateTextKey = "config.item.volume.bgm"
+
+[node name="Slider" type="HSlider" parent="Box/Bgm"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Bgs" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Label" type="Label" parent="Box/Bgs"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme = ExtResource("2_thm")
+script = ExtResource("3_i18n")
+InflateTextKey = "config.item.volume.bgs"
+
+[node name="Slider" type="HSlider" parent="Box/Bgs"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Voice" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Label" type="Label" parent="Box/Voice"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme = ExtResource("2_thm")
+script = ExtResource("3_i18n")
+InflateTextKey = "config.item.volume.voice"
+
+[node name="Slider" type="HSlider" parent="Box/Voice"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Sfx" type="HBoxContainer" parent="Box"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Label" type="Label" parent="Box/Sfx"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme = ExtResource("2_thm")
+script = ExtResource("3_i18n")
+InflateTextKey = "config.item.volume.sound"
+
+[node name="Slider" type="HSlider" parent="Box/Sfx"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Footer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -80.0
+offset_right = 260.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+theme_override_constants/separation = 40
+
+[node name="ReturnTitleButton" type="Button" parent="Footer"]
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+theme = ExtResource("2_thm")
+
+[node name="QuitButton" type="Button" parent="Footer"]
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 2
+theme = ExtResource("2_thm")

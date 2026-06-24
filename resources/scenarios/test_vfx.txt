@@ -1,0 +1,54 @@
+@<|
+label("test_vfx", "VFX测试1")
+is_unlocked_start()
+|>
+<|
+set_box()
+show("bg", "cg/rain_back")
+|>
+测试 VFX(M8 阶段0+1:基础设施 + mono/color/colorless/fade)
+
+<|
+vfx("cam", "mono", 0.9, 0.3)
+|>
+cam 黑白闪回(layer 0,默认层),0.3 秒内变成 90% 黑白,对照 ch2.txt 的 anim:vfx(cam,'mono',{0,0.9},0.3)
+
+<|
+vfx("cam", "mono", 0, 0.3)
+|>
+0.3 秒内恢复彩色
+
+<|
+vfx("cam", "mono", 0.2, 0.3)
+vfx("cam", ["color", 1], 1, 2, { _ColorMul = Color(3, 3, 3, 1) })
+|>
+模拟 ch4.txt 失色症揭示第一步:layer 0(mono,20%灰)+ layer 1(color,_ColorMul=3 强力染色)同时生效,验证两个独立层不会互相覆盖
+
+<|
+vfx("cam", ["colorless", 2], 1, 1)
+|>
+再叠加 layer 2(colorless,色差扭曲),验证三层(mono/color/colorless)能同时叠加链式生效——这是 hint_screen_texture 串行链是否真的按节点顺序逐层处理"目前已经画出来的画面"的关键验证点
+
+<|
+vfx("cam", null)
+vfx("cam", [null, 1])
+vfx("cam", [null, 2])
+|>
+依次清除三层(layer 0/1/2),画面应完全恢复正常,跟最开始一样
+
+<|
+vfx("bg", "fade", 1, 2, { _SubTex = "foregrounds/moon_halo" })
+|>
+bg 单对象 fade(spatial,MaterialOverride):2 秒内从当前背景过渡到 foregrounds/moon_halo——这次没有移植任何 Mask 素材,所以是整屏均匀淡入淡出,只验证 _MainTex/_SubTex 混合的核心逻辑,不验证擦除形状(_Mask)
+
+<|
+vfx("bg", null)
+|>
+清除 bg 的 fade 材质,应瞬间变回 MaterialOverride=null 的正常贴图渲染(纯黑白验证用,不应有任何残留滤镜)
+
+<|
+hide("bg")
+|>
+结束
+
+@<| is_end() |>

@@ -1,0 +1,97 @@
+@<|
+label("test_vfx_noise", "VFX测试3")
+is_unlocked_start()
+|>
+<|
+set_box()
+show("bg", "cg/rain_back")
+|>
+测试 VFX(M8 阶段3:噪声/扭曲家族,共享 noise.gdshaderinc,部分复用 blur.gdshaderinc)
+
+<|
+vfx("cam", "ripple", 1, 1, { _Amp = 0.05, _RFreq = 30 })
+|>
+ripple:以屏幕中心为原点的环形波纹扭曲(类似水波纹),_BlurSize 默认 1 时波峰处还会跟着模糊
+
+<|
+vfx("cam", null)
+vfx("cam", "ripple_move", 1, 2, { _Amp = 0.05, _RFreq = 30, _Width = 0.15, _Fade = 0.15 })
+|>
+ripple_move:波纹从中心向外扩散移动(_T 控制波峰位置,而不是整体强度),应该看到一道环状波纹向外传播,而不是 ripple 那种原地震荡
+
+<|
+vfx("cam", null)
+vfx("cam", "water", 1, 1, { _Distort = 8 })
+|>
+water:噪声驱动的水面折射扭曲,画面应像隔着水面看东西一样持续晃动(噪声随 TIME 变化,不是静止的)
+
+<|
+vfx("cam", null)
+vfx("cam", "wiggle", 1, 1, { _XAmp = 0.02, _YAmp = 0.02, _XFreq = 5, _YFreq = 5, _TFreq = 2, _BlinkAmp = 0.3, _BlinkFreq = 8, _Mono = 0.5 })
+|>
+wiggle:画面抖动扭曲 + 半灰度化(_Mono=0.5)+ 周期性闪烁增亮(_BlinkAmp)
+
+<|
+vfx("cam", null)
+vfx("cam", "gray_wave", 1, 1, { _Freq = 2, _Size = 80 })
+|>
+gray_wave:颜色越接近某个随时间漂移的灰度值的像素越亮,应该能看到画面里有一条"等值线"亮带在扫动
+
+<|
+vfx("cam", null)
+vfx("cam", "blink", 1, 1, { _Amp = -0.5, _Freq = 15 })
+|>
+blink:随机闪黑(噪声驱动的整体变暗脉冲),应该看到不规则的明暗闪烁,不是固定频率的规律闪烁
+
+<|
+vfx("cam", null)
+vfx("cam", "shake", 1, 1, { _XAmp = 0.03, _YAmp = 0.03, _Freq = 12 })
+|>
+shake:画面整体随机抖动位移(逐帧跳变,不是平滑漂移),对照原版 vertex shader 里 floor(_Freq*_Time.y) 的逐帧定格随机量
+
+<|
+vfx("cam", null)
+vfx("cam", "rand_roll", 1, 0)
+|>
+rand_roll:画面整体随机平移并循环卷绕(超出边缘的部分从另一侧绕回来),没有 duration(0)所以是瞬间跳变,不是动画过渡
+
+<|
+vfx("cam", null)
+vfx("cam", "roll", 1, 1, { _XSpeed = 0.3, _YSpeed = 0.1 })
+|>
+roll:画面整体匀速滚动卷绕(类似无限滚动背景),方向和速度由 _XSpeed/_YSpeed 控制
+
+<|
+vfx("cam", null)
+vfx("cam", "kaleido", 1, 1, { _Repeat = 6, _Freq = 2 })
+|>
+kaleido:万花筒折叠效果,画面应被折成对称重复的碎片图案,随时间旋转
+
+<|
+vfx("cam", null)
+vfx("cam", "barrel", 1, 1, { _Sigma = 0.4, _Chroma = 0.3 })
+|>
+barrel:桶形畸变(鱼眼),画面中心放大、边缘向外膨胀;_Chroma>0 时三个颜色通道的畸变程度略有差异,边缘应能看到轻微色散
+
+<|
+vfx("cam", null)
+vfx("cam", "barrel_hyper", 1, 1, { _Sigma = 0.4, _Chroma = 0.3 })
+|>
+barrel_hyper:同样是桶形畸变,但用线性近似(没有 asin),对比 barrel 应该是相近但不完全一样的畸变曲率(尤其在大畸变量时差异更明显)
+
+<|
+vfx("cam", "barrel_hyper", 0, 1.5)
+|>
+渐出演示:不清除材质,而是把同一个 barrel_hyper 的 _T 在 1.5 秒内动画回 0——_T=0 时桶形畸变公式的 ratio=1.0(无缩放),应该平滑地"拉直"回原图,跟之前几步"vfx(cam,null) 瞬间消失"是完全不同的两种收尾方式
+
+<|
+vfx("cam", null)
+|>
+现在再清除材质:因为上一步已经把 _T 渐出到 0(画面已经是干净原图),这次清除应该完全看不出任何跳变,画面应跟最初的 cg/rain_back 一模一样,没有任何残留扭曲
+
+<|
+hide("bg")
+|>
+结束
+
+@<| is_end() |>

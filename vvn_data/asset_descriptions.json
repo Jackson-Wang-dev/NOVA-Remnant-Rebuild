@@ -1,0 +1,260 @@
+{
+  "resources/backgrounds/black.png": {
+    "description": ""
+  },
+  "resources/backgrounds/corridor.png": {
+    "description": "Empty modern corridor, no people. Long, clean hallway with white walls and ceiling-mounted fluorescent lights. Left side has glass-paneled doors/walls; right side features large windows reflecting an exterior building with trees, dark blue tint, and falling particles (snow/leaves). Lower right wall has dark panel with triangular indentations and a white window sill. Deep perspective leads to a distant door, creating a sterile, empty atmosphere."
+  },
+  "resources/backgrounds/room.png": {
+    "description": ""
+  },
+  "resources/backgrounds/staff.png": {
+    "description": ""
+  },
+  "resources/backgrounds/toilet.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/body.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eye_close.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eye_divert.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eye_down.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eye_normal.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eye_shock.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eye_smile.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eye_squint.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eyebrow_angry.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eyebrow_angry2.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eyebrow_down.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eyebrow_down2.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eyebrow_happy.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eyebrow_normal.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/eyebrow_side.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/hair.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/mouth_close.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/mouth_close2.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/mouth_happy.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/mouth_open.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/mouth_open2.png": {
+    "description": ""
+  },
+  "resources/standings/Ergong/mouth_smile.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/blush.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/body.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eye_close.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eye_cry.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eye_divert.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eye_down.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eye_normal.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eye_shock.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eye_smile.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eyebrow_angry.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eyebrow_down.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eyebrow_down2.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/eyebrow_normal.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/hair.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/mouth_close.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/mouth_close2.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/mouth_happy.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/mouth_open.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/mouth_open2.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/mouth_smile.png": {
+    "description": ""
+  },
+  "resources/standings/Gaotian/sweat.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/body.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eye_close.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eye_divert.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eye_normal.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eye_shock.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eye_smile.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eye_squint.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eyebrow_angry.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eyebrow_down.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/eyebrow_normal.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/hair.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/mouth_close.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/mouth_happy.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/mouth_open.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/mouth_open2.png": {
+    "description": ""
+  },
+  "resources/standings/Qianye/mouth_smile.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/body.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eye_close.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eye_divert.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eye_down.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eye_normal.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eye_shock.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eye_smile.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eye_squint.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eyebrow_angry.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eyebrow_angry2.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eyebrow_down.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eyebrow_down2.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eyebrow_happy.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eyebrow_normal.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/eyebrow_side.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/hair.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/mouth_close.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/mouth_close2.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/mouth_happy.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/mouth_open.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/mouth_open2.png": {
+    "description": ""
+  },
+  "resources/standings/Xiben/mouth_smile.png": {
+    "description": ""
+  }
+}

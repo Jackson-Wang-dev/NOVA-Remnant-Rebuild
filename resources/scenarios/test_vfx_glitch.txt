@@ -1,0 +1,48 @@
+@<|
+label("test_vfx_glitch", "VFX测试4")
+is_unlocked_start()
+|>
+<|
+set_box()
+show("bg", "cg/rain_back")
+|>
+测试 VFX(M8 阶段4:故障/损伤家族)
+
+<|
+vfx("cam", "broken_tv", 1, 1)
+|>
+broken_tv:经典"坏电视"效果——画面应该看到水平滚动跳动(Y Roll)、左右抖动(X Offset)、扫描线、雪花噪点和轻微色散同时出现,持续随机变化
+
+<|
+vfx("cam", "broken_tv", 0, 1)
+|>
+渐出回干净画面:_T 动画回 0,所有故障元素应该逐渐减弱并消失(注意:_T=0 时这个 shader 仍然会持续重新随机采样,但失真幅度趋近于 0,应该几乎看不出问题——跟前几个阶段"_T=0 即纯净直通"的效果不完全一样,这里是"幅度趋零"而不是"逻辑短路成直通")
+
+<|
+vfx("cam", null)
+vfx("cam", "glitch", 1, 1)
+|>
+glitch:块状随机错位 + 色彩通道错位 + 随机色块覆盖,应该看到不规则的矩形区域跳动错位,跟 broken_tv 的"整屏滚动"质感不同,glitch 是"局部分块"质感
+
+<|
+vfx("cam", "glitch", 0, 1)
+|>
+渐出回干净画面:_T 动画回 0,所有故障块应该逐渐消退(这个跟前几阶段一样,_T=0 时三个 blockOffsetPass 的 threshold 都趋近 0,uvOffset/rbOffset 的触发条件 "< _T" 也趋近 0,应该收敛成几乎完全干净的直通)
+
+<|
+vfx("cam", null)
+vfx("cam", "masked_mosaic", 1, 2, { _Mask = "foregrounds/moon_halo", _Strength = 15 })
+|>
+masked_mosaic:按 _Mask 贴图的红色通道决定每个像素的马赛克强度——这次没有移植真正的 Mask 素材,借用 foregrounds/moon_halo 的光晕形状代替,应该能看到马赛克效果集中在光晕亮的区域、暗区基本不受影响,不是均匀铺满全屏(这是验证"读取遮罩贴图"这条逻辑本身是否生效,不代表真实剧本会用这张图当遮罩)
+
+<|
+vfx("cam", null)
+|>
+清除特效,画面应完全恢复成最初的 cg/rain_back,没有任何残留故障效果
+
+<|
+hide("bg")
+|>
+结束
+
+@<| is_end() |>

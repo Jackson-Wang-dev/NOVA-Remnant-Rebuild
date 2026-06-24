@@ -41,6 +41,7 @@ public partial class ScriptLoader(string path) : RefCounted, ISingleton
 
         _flowChartGraph.Unfreeze();
         _flowChartGraph.Clear();
+        MemoryTable.Clear();
 
         GDRuntime.BaseRuntimeBlock.Set("_script_loader", this);
 
@@ -294,12 +295,36 @@ public partial class ScriptLoader(string path) : RefCounted, ISingleton
     /// <param name="destination">Name of the destination node</param>
     /// <param name="text">Text on the button to select this branch</param>
     /// <param name="imageInfo"></param>
-    /// <param name="mode"></param>
+    /// <param name="modeName">"normal"/"jump"/"show"/"enable"</param>
     /// <param name="condition"></param>
-    public void RegisterBranch(string name, string destination, string text, Variant imageInfo,
-        BranchMode mode, string condition)
+    // mode arrives from GDScript (script_loader.gd's branch()) as a plain string ("normal"/"jump"/
+    // "show"/"enable") rather than the BranchMode enum directly - Godot's GDScript-to-C# call
+    // marshalling doesn't convert an arbitrary String into a C#-only enum type, it silently coerces to
+    // the enum's zero value (Normal) instead of throwing, which made every "show"/"enable"/"jump"
+    // branch with a condition look like an invalid "Normal with condition" branch. Parsing the string
+    // explicitly here avoids relying on that marshalling.
+    private static BranchMode ParseBranchMode(string mode) => mode switch
     {
+        "jump" => BranchMode.Jump,
+        "show" => BranchMode.Show,
+        "enable" => BranchMode.Enable,
+        _ => BranchMode.Normal
+    };
+
+    public void RegisterBranch(string name, string destination, string text, Variant imageInfo,
+        string modeName, string condition)
+    {
+        var mode = ParseBranchMode(modeName);
         var hasCondition = !string.IsNullOrEmpty(condition);
+        // GDScript's null, when passed through Variant marshalling into a C# string parameter, arrives
+        // as "" rather than a literal null (the existing hasCondition check above already accounted for
+        // this for `condition` - `text` didn't, which made every text-less Jump branch look like it had
+        // text). Normalize once here so every "is text present" check below behaves correctly.
+        if (string.IsNullOrEmpty(text))
+        {
+            text = null;
+        }
+
         if (string.IsNullOrEmpty(destination))
         {
             throw new ScriptLoadingException("A branch must have a destination.",
@@ -312,7 +337,7 @@ public partial class ScriptLoader(string path) : RefCounted, ISingleton
                 _currentNode, $"destination: {destination}");
         }
 
-        if (mode == BranchMode.Jump && (text != null || imageInfo.VariantType == Variant.Type.Nil))
+        if (mode == BranchMode.Jump && (text != null || imageInfo.VariantType != Variant.Type.Nil))
         {
             throw new ScriptLoadingException("Branch mode is Jump but text or imageInfo is not null.",
                 _currentNode, $"destination: {destination}");

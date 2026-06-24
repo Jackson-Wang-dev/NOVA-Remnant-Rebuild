@@ -23,6 +23,11 @@ public partial class ButtonRingTrigger : Control
         _buttonRing.Hide();
     }
 
+    public string ConfirmSelection()
+    {
+        return _buttonRing.ConfirmSelection();
+    }
+
     public void SetRingPosition(Vector2 position)
     {
         _buttonRing.Position = position - _buttonRing.PivotOffset;

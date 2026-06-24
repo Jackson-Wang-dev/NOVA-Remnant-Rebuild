@@ -1,0 +1,84 @@
+[gd_scene format=3 uid="uid://b6h2k8p4v3xqr"]
+
+[ext_resource type="Script" path="res://nova/sources/scripts/ui/SaveEntryController.cs" id="1_sve"]
+[ext_resource type="Script" path="res://nova/sources/scripts/ui/i18n/I18nText.cs" id="2_i18n"]
+
+[node name="SaveEntry" type="Control" node_paths=PackedStringArray("_thumbnailButton", "_thumbnailImage", "_idText", "_dateText", "_latestBadge", "_deleteButton")]
+custom_minimum_size = Vector2(280, 200)
+layout_mode = 2
+script = ExtResource("1_sve")
+_thumbnailButton = NodePath("ThumbnailButton")
+_thumbnailImage = NodePath("ThumbnailButton/Image")
+_idText = NodePath("ThumbnailButton/IdText")
+_dateText = NodePath("ThumbnailButton/DateText")
+_latestBadge = NodePath("ThumbnailButton/LatestBadge")
+_deleteButton = NodePath("DeleteButton")
+
+[node name="ThumbnailButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Image" type="TextureRect" parent="ThumbnailButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 4.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IdText" type="Label" parent="ThumbnailButton"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_right = -4.0
+offset_bottom = 24.0
+grow_horizontal = 0
+mouse_filter = 2
+horizontal_alignment = 2
+
+[node name="DateText" type="Label" parent="ThumbnailButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+horizontal_alignment = 1
+
+[node name="LatestBadge" type="Label" parent="ThumbnailButton"]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+offset_right = 60.0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("2_i18n")
+InflateTextKey = "bookmark.date.latest"
+
+[node name="DeleteButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -28.0
+offset_right = -4.0
+offset_bottom = 24.0
+grow_horizontal = 0
+text = "x"

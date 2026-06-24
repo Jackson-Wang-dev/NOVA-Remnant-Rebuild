@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace Nova;
@@ -33,7 +34,7 @@ public partial class ChoiceButtonController : Button
     public void Init(ChoiceData choiceData, Action onClick)
     {
         Theme = Assets.Instance.DefaultTheme;
-        DisplayTexts = choiceData.Texts;
+        DisplayTexts = choiceData.Texts.ToDictionary(x => x.Key, x => DialogueEntry.InterpolateText(x.Value));
         _onClick = onClick;
     }
 

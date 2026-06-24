@@ -39,8 +39,12 @@ public partial class ChapterSelectController : ViewController
         var unlockedAtFirst = new HashSet<string>(_gameState.GetStartNodeNames(
             _unlockAllNodes ? StartNodeType.All : StartNodeType.Unlocked));
 
-        // TODO: add reached history
-        _unlockedNodes = new(_activeNodes.Where(unlockedAtFirst.Contains));
+        // A node not unlocked at first (is_start(), not is_unlocked_start()/is_default_start()) is
+        // still selectable once the player has actually reached it at least once - e.g. ch2.txt's
+        // is_start() so ch1's title-screen chapter list doesn't show it as a fake "new game" entry,
+        // but it must still show up (and stay selectable) after the player has played through ch1.
+        _unlockedNodes = new(_activeNodes.Where(node =>
+            unlockedAtFirst.Contains(node) || SaveManager.Instance.IsReachedAnyHistory(node, 0)));
     }
 
     private Button InitButton(string nodeName)
@@ -89,7 +93,12 @@ public partial class ChapterSelectController : ViewController
 
     public void StartGame(string nodeName)
     {
-        this.SwitchView<GameViewController>(() => _gameState.StartGame(nodeName));
+        // Reset/populate game state before the view transition starts (same ordering as
+        // SaveLoadController.LoadSlot), not in ShowPanel's onFinish callback: that only fires after
+        // GameView's fade-in tween completes, so for that whole 0.2s GameView would already be visible
+        // and rendering leftover state from whatever was last on screen before returning to the title.
+        _gameState.StartGame(nodeName);
+        this.SwitchView<GameViewController>();
     }
 
     public override void ShowPanel(bool doTransition, Action onFinish)

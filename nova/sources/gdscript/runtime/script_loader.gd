@@ -66,14 +66,15 @@ static func branch(branches: Array) -> void:
 
 		var name: String = str(i)
 		var dest         = _try_get_local_name(entry["dest"])
+		var text = entry.get("text", null)
 		var image_info = entry.get("image", null)
 		var mode = entry.get("mode", "normal")
 		var cond = entry.get("cond", "")
 
 		if _script_loader.IsDefaultLocale:
-			_script_loader.RegisterBranch(name, dest, entry["text"], image_info, mode, cond)
+			_script_loader.RegisterBranch(name, dest, text, image_info, mode, cond)
 		else:
-			_script_loader.AddLocalizedBranch(name, dest, entry["text"])
+			_script_loader.AddLocalizedBranch(name, dest, text)
 
 	_script_loader.EndRegisterBranch()
 
@@ -93,6 +94,17 @@ static func is_start() -> void:
 ## indicates is_chapter() and is_start()
 #@export
 static func is_unlocked_start() -> void:
+	_script_loader.SetCurrentAsChapter()
+	_script_loader.SetCurrentAsUnlockedStart()
+
+## set the current node as THE default start point, opened automatically without going through
+## chapter select. Nova1 hierarchy is is_default_start() > is_unlocked_start() > is_start() (each
+## implies the ones below) - nova2's TitleController currently always routes "start game" through
+## ChapterSelectController (no "skip select for new games" concept exists yet), so for now this is
+## a synonym for is_unlocked_start(): enough for the node to parse and be reachable from chapter
+## select. Revisit if/when title-screen flow grows a real "skip chapter select" path.
+#@export
+static func is_default_start() -> void:
 	_script_loader.SetCurrentAsChapter()
 	_script_loader.SetCurrentAsUnlockedStart()
 

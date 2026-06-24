@@ -1,0 +1,79 @@
+@<|
+label("test_vfx_blur", "VFX测试2")
+is_unlocked_start()
+|>
+<|
+set_box()
+show("bg", "cg/rain_back")
+|>
+测试 VFX(M8 阶段2:模糊家族,共享 blur.gdshaderinc)
+
+<|
+vfx("cam", "gaussian_blur", 1, 1, { _Size = 40 })
+|>
+gaussian_blur:1 秒内画面整体高斯模糊(11 点求积),对照 GaussianBlur.shaderproto
+
+<|
+vfx("cam", null)
+vfx("cam", "lens_blur", 1, 1, { _Size = 40 })
+|>
+清除后切换 lens_blur:同样的 11 点求积、不同权重,模糊形状应比 gaussian_blur 更接近镜头光斑(更柔和的边缘)
+
+<|
+vfx("cam", null)
+vfx("cam", "motion_blur", 1, 1, { _Size = 60, _Theta = 0.5 })
+|>
+motion_blur:7 点直线求积,沿 _Theta 指定角度方向产生运动拖影
+
+<|
+vfx("cam", null)
+vfx("cam", "radial_blur", 1, 1, { _Size = 60 })
+|>
+radial_blur:以屏幕中心为原点,沿径向方向做运动模糊(中心不模糊,边缘模糊最强)
+
+<|
+vfx("cam", null)
+vfx("cam", "rotation_blur", 1, 1, { _Size = 60 })
+|>
+rotation_blur:同样以中心为原点,但模糊方向是切向(旋转感),不是径向
+
+<|
+vfx("cam", null)
+vfx("cam", "glow", 1, 1, { _Size = 30, _Strength = 2 })
+|>
+glow:对画面亮部(灰度^4 加权)做高斯模糊后跟原图做 screen 混合,模拟辉光
+
+<|
+vfx("cam", null)
+vfx("cam", "overglow", 1, 1, { _Zoom = 0.6, _Mul = 1.5 })
+|>
+overglow:把画面按 _Zoom 缩放后叠加回原图(不经过 Blur.cginc,是缩放叠加型辉光)
+
+<|
+vfx("cam", null)
+vfx("cam", "sharpen", 1, 1, { _Size = 20, _Strength = 1.5 })
+|>
+sharpen:反锐化蒙版(原图 + strength*(原图-模糊图)),画面应比原图边缘更锐利、有锐化光晕
+
+<|
+vfx("cam", null)
+vfx("cam", "fade_radial_blur", 0, 1, { _Size = 60, _Zoom = 0.6, _SubTex = "foregrounds/moon_halo" })
+|>
+fade_radial_blur 起点(_T=0):模糊量本身由 _T 调制,起点应该是清晰的原背景,不带任何模糊(_MainTex 这一路的模糊速度=_Size*_T=0)
+
+<|
+vfx("cam", "fade_radial_blur", 1, 2)
+|>
+fade_radial_blur 过渡到终点(_T=1,2秒):中途(_T≈0.5 附近)应能看到画面糊成一片(两路模糊量同时较大,这才是"径向模糊甩镜转场"的设计本意,不是两端模糊、是中间最糊),终点收敛为清晰的 foregrounds/moon_halo
+
+<|
+vfx("cam", null)
+|>
+清除特效,画面应完全恢复成最初的 cg/rain_back,没有任何残留模糊/辉光
+
+<|
+hide("bg")
+|>
+结束
+
+@<| is_end() |>

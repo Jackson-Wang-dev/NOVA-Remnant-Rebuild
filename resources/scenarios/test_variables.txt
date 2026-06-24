@@ -1,0 +1,57 @@
+@<|
+label("test_variables", "变量测试")
+is_unlocked_start()
+|>
+<|
+show("bg", "cg/rain_back")
+set_box()
+|>
+测试 NovaScript 变量系统(M9):v_ 局部变量、gv_ 全局变量、branch 的 cond、{{...}} 文本插值
+
+<|
+gv_play_count = (gv_play_count if gv_play_count != null else 0) + 1
+|>
+这是本测试章节第 {{gv_play_count}} 次开始(gv_ 是全局变量,从章节选择重新进入本章节也不会清零,应该逐次递增;如果显示的不是 {{gv_play_count}},说明插值没生效)
+
+<|
+v_flag = 0
+|>
+接下来测试循环加 v_flag(局部变量,每次重新进入本章节都会清零归 0)
+
+@<| label("l_begin_loop") |>
+要加一个 v_flag 吗?当前 v_flag = {{v_flag}}
+@<|
+branch([
+    { dest="l_add_flag", text="加一个,现在有 {{v_flag}} 个" },
+    { dest="l_end_loop", text="不加了" },
+])
+|>
+
+@<| label("l_add_flag") |>
+<|
+v_flag = v_flag + 1
+|>
+现在有 {{v_flag}} 个 v_flag
+@<| jump_to("l_begin_loop") |>
+
+@<| label("l_end_loop") |>
+如果 v_flag > 3 会直接跳到最后(mode="jump" 的条件分支,不弹选项 UI)
+@<|
+branch([
+    { dest="l_show_save_hint", text="普通选项(总是出现)" },
+    { dest="l_show_save_hint", text="v_flag > 1 才会出现", mode="show", cond="v_flag > 1" },
+    { dest="l_show_save_hint", text="v_flag < 2 才能点击", mode="enable", cond="v_flag < 2" },
+    { dest="l_end", mode="jump", cond="v_flag > 3" },
+])
+|>
+
+@<| label("l_show_save_hint") |>
+现在可以按 S 存档,然后继续往下走一步,再按 L 读档,确认 v_flag/gv_play_count 都正确回到存档时的值(VariablesHash 参与的节点去重不应该导致读档后状态错乱)
+@<| jump_to("l_end") |>
+
+@<| label("l_end") |>
+<|
+set_box("hide")
+|>
+测试结束。请记住当前 gv_play_count 的值,然后从章节选择重新进入本章节(会触发 StartGame → ResetGameState):应该看到 v_flag 归零(对话又会显示"当前 v_flag = 0"),而 gv_play_count 比刚才又多了 1。
+@<| is_end() |>

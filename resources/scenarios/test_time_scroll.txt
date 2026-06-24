@@ -1,0 +1,18 @@
+@<|
+label("test_time_scroll", "时间滚动测试")
+is_unlocked_start()
+|>
+<|
+show("bg", "backgrounds/room")
+set_box()
+|>
+时间滚动动画测试
+
+<|
+time_scroll(2024,1,1,8,0,0, 2024,7,15,20,30,0, 2)
+auto_step()
+|>
+从 2024 年 1 月 1 日跳到 7 月 15 日(全屏过场,播完会自动跳到下一条,不需要点击)
+
+测试结束
+@<| is_end() |>

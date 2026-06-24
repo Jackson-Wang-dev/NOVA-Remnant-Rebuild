@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Nova.Exceptions;
 
 namespace Nova;
 
@@ -13,6 +14,30 @@ public partial class GameState : ISingleton
     private int _currentDialogueIndex;
     private DialogueEntry _currentDialogueEntry;
     private bool _ensureCheckpoint;
+
+    // Internal speaker name of whichever entry is currently executing/just executed its Default
+    // action - stable for the whole BeforeCheckpoint/Default/DialogueChanged/AfterDialogue sequence
+    // of one entry (see UpdateDialogue), so callers like AvatarController can read "who is currently
+    // speaking" both while Default-stage script calls (e.g. avatar()) run and when DialogueChanged fires.
+    public string CurrentCharacterName => _currentDialogueEntry?.CharacterName;
+
+    /// <summary>
+    /// NodeRecord id for the dialogue entry currently being processed - valid to read synchronously
+    /// from a DialogueChanged handler (BacklogViewController does, to remember where to jump back to).
+    /// </summary>
+    public int CurrentNodeRecordId => _nodeRecord?.Id ?? NodeRecord.NoId;
+
+    /// <summary>
+    /// Index of the dialogue entry currently being displayed within CurrentNode - paired with
+    /// CurrentNodeRecordId to address "where the player is" (see ReloadScripts/MoveTo).
+    /// </summary>
+    public int CurrentDialogueIndex => _currentDialogueIndex;
+
+    /// <summary>
+    /// Pointer into SaveManager's checkpoint tree for the current (node, dialogue index) position.
+    /// Advanced alongside CurrentNode/_currentDialogueIndex; see MoveToNextNode and SaveCheckpoint.
+    /// </summary>
+    private NodeRecord _nodeRecord;
 
     private enum State
     {
@@ -107,7 +132,9 @@ public partial class GameState : ISingleton
         CurrentNode = null;
         _currentDialogueIndex = 0;
         _currentDialogueEntry = null;
+        _nodeRecord = null;
         _state = State.Ended;
+        Variables.Instance.ClearLocal();
     }
 
     public void SignalFence<T>(T result)
@@ -133,6 +160,8 @@ public partial class GameState : ISingleton
     private void StartGame(FlowChartNode startNode)
     {
         ResetGameState();
+        StateManager.Instance.ResetToBaseline();
+        VfxManager.Instance.ClearAllLayers();
         _state = State.Normal;
         GameStarted.Invoke();
         MoveToNextNode(startNode);
@@ -254,8 +283,7 @@ public partial class GameState : ISingleton
             case FlowChartNodeType.End:
                 _state = State.Ended;
                 var endName = _flowChartGraph.GetEndName(CurrentNode);
-                // TODO
-                // checkpointManager.SetEndReached(endName);
+                SaveManager.Instance.SetReachedEnd(endName);
                 RouteEnded.Invoke(new() { EndName = endName });
                 break;
             default:
@@ -270,10 +298,8 @@ public partial class GameState : ISingleton
         // so the bookmark is left at the end of last node
         if (nextNode.DialogueEntryCount > 0)
         {
-            // TODO
-            // nodeRecord = checkpointManager.GetNextNode(nodeRecord, nextNode.name, variables, 0);
+            _nodeRecord = SaveManager.Instance.GetNextNodeRecord(_nodeRecord, nextNode.Name, Variables.Instance.Hash, 0);
             _currentDialogueIndex = 0;
-            // checkpointOffset = nodeRecord.offset;
         }
 
         CurrentNode = nextNode;
@@ -327,24 +353,200 @@ public partial class GameState : ISingleton
         MoveToNextNode(CurrentNode.GetNext(branchName));
     }
 
+    /// <summary>
+    /// Advance _nodeRecord's bookkeeping for the current dialogue index.
+    /// </summary>
+    /// <remarks>
+    /// No GameStateCheckpoint snapshot is recorded (unlike Nova1): loading a bookmark replays the
+    /// script instead of deserializing a snapshot, see SaveManager and RestorePath. This method only
+    /// maintains the checkpoint tree's bookkeeping (EndDialogue / branching-revisit dedup), which is
+    /// still needed so bookmarks have a stable NodeRecord to point at.
+    /// </remarks>
+    /// <returns>
+    /// Whether this exact (node, dialogue index) was already recorded under _nodeRecord before this
+    /// call - true when re-stepping through previously-visited territory (e.g. during restore).
+    /// </returns>
     private bool SaveCheckpoint(bool firstEntryOfNode, bool dialogueStepped)
     {
-        // TODO
-        return false;
+        var saveManager = SaveManager.Instance;
+
+        // If we've stepped past everything previously recorded for this NodeRecord, but it already has
+        // a child (i.e. some other continuation was already recorded from here), this step represents a
+        // different path through the same node and needs its own sibling NodeRecord rather than mutating
+        // the existing one. Mirrors Nova1's CheckpointManager.AppendSameNode trigger.
+        var atEndOfNodeRecord = _nodeRecord.ChildId != NodeRecord.NoId && _currentDialogueIndex >= _nodeRecord.EndDialogue;
+        var isReached = _currentDialogueIndex < _nodeRecord.EndDialogue;
+        if (atEndOfNodeRecord)
+        {
+            _nodeRecord = saveManager.GetNextNodeRecord(_nodeRecord, _nodeRecord.Name, Variables.Instance.Hash, _currentDialogueIndex);
+            isReached = _currentDialogueIndex < _nodeRecord.EndDialogue;
+        }
+
+        if (!isReached)
+        {
+            saveManager.AppendDialogue(_nodeRecord, _currentDialogueIndex);
+        }
+
+        return isReached;
     }
 
     private bool SaveReachedData(out ReachedDialogueData dialogueData)
     {
+        var saveManager = SaveManager.Instance;
+        var isReachedAnyHistory = saveManager.IsReachedAnyHistory(_nodeRecord.Name, _currentDialogueIndex);
+
+        // Always build dialogueData from the live _currentDialogueEntry rather than trusting
+        // saveManager.GetReachedDialogue's persisted record when isReachedAnyHistory - that record's
+        // TextHash is whatever the script content hashed to the first time this (node, index) was
+        // reached, possibly in an earlier session, and never gets refreshed. Editing a scenario .txt
+        // (e.g. adding/changing an <mmr>/<dmg> line) changes the live hash but not the stale persisted
+        // one, so MemoryTable.Variants - rebuilt fresh from the current script every launch - would
+        // permanently miss the lookup in BacklogViewController. SetReachedDialogue below still only
+        // writes once per (node, index), preserving the existing "first reached" bookkeeping used by
+        // IsReachedAnyHistory's unread/skip and chapter-unlock checks.
         dialogueData = new ReachedDialogueData()
         {
-            NodeName = CurrentNode.Name,
+            NodeName = _nodeRecord.Name,
             DialogueIndex = _currentDialogueIndex,
             NeedInterpolate = _currentDialogueEntry.NeedInterpolate,
             TextHash = _currentDialogueEntry.TextHash
         };
-        // TODO
-        return false;
+        if (!isReachedAnyHistory)
+        {
+            saveManager.SetReachedDialogue(dialogueData);
+        }
+        return isReachedAnyHistory;
     }
+
+    #region Bookmarks (save / load)
+
+    /// <summary>
+    /// Save the current position as a bookmark (save slot).
+    /// </summary>
+    public void SaveBookmark(int saveId)
+    {
+        if (_nodeRecord == null)
+        {
+            Utils.Warn("Cannot save bookmark: no active game.");
+            return;
+        }
+
+        SaveManager.Instance.SaveBookmark(saveId, _nodeRecord, _currentDialogueIndex,
+            _currentDialogueEntry.GetDisplayData());
+    }
+
+    /// <summary>
+    /// Load a bookmark by replaying the script from the start down to its saved position.
+    /// </summary>
+    public void LoadGame(int saveId)
+    {
+        var bookmark = SaveManager.Instance.LoadBookmark(saveId);
+        if (bookmark == null)
+        {
+            Utils.Warn($"Failed to load bookmark {saveId}.");
+            return;
+        }
+
+        MoveTo(bookmark.NodeRecordId, bookmark.DialogueIndex);
+    }
+
+#if DEBUG
+    /// <summary>
+    /// Dev-only hot reload, mirroring Nova1's ReloadScriptsHelper (R key): re-parse the current
+    /// scenario files from disk and resume at roughly the same position. ScriptLoader.OnEnter() is
+    /// itself idempotent (Unfreeze/Clear/rebuild the FlowChartGraph in place, same object instance -
+    /// see its own doc comment), so calling it again outside NovaController's normal once-only init
+    /// flow is safe; MoveTo then replays the recorded path on the freshly rebuilt graph, the same
+    /// mechanism LoadGame/Backlog-jump already use, re-resolving every node by name rather than
+    /// reusing now-stale FlowChartNode references from before the reload.
+    /// </summary>
+    public void ReloadScripts()
+    {
+        var nodeRecordId = CurrentNodeRecordId;
+        var dialogueIndex = _currentDialogueIndex;
+
+        NovaController.Instance.GetObj<ScriptLoader>().OnEnter();
+
+        if (nodeRecordId != NodeRecord.NoId)
+        {
+            MoveTo(nodeRecordId, dialogueIndex);
+        }
+    }
+#endif
+
+    /// <summary>
+    /// Jump directly to a previously-reached (node record, dialogue index) position by replaying the
+    /// script from the root - the same mechanism LoadGame uses for a bookmark, just addressed by node
+    /// record id directly instead of going through a saved Bookmark file. Used by BacklogViewController's
+    /// "jump back" action.
+    /// </summary>
+    public void MoveTo(int nodeRecordId, int dialogueIndex)
+    {
+        var path = SaveManager.Instance.GetPathTo(nodeRecordId);
+        if (path.Count == 0)
+        {
+            Utils.Warn($"Cannot move to node record {nodeRecordId}: unknown node record.");
+            return;
+        }
+
+        ResetGameState();
+        StateManager.Instance.ResetToBaseline();
+        _state = State.Restoring;
+        RestoreStarts.Invoke(true);
+        GameStarted.Invoke();
+        StartCoroutine(token => RestorePath(path, dialogueIndex, token));
+    }
+
+    /// <summary>
+    /// Replay the script along a previously recorded path down to the target dialogue index, instead of
+    /// deserializing a state snapshot (see SaveManager's class doc). Bypasses branch selection UI
+    /// entirely: which node comes next at a Branching node is already known from the recorded path, so
+    /// this never calls DoBranch and never blocks on the fence.
+    /// </summary>
+    private async Task RestorePath(IReadOnlyList<NodeRecord> path, int targetDialogueIndex, CancellationToken token)
+    {
+        try
+        {
+            for (var i = 0; i < path.Count; i++)
+            {
+                var record = path[i];
+                var node = _flowChartGraph.GetNode(record.Name) ??
+                    throw new ScriptLoadingException($"Restore failed: unknown node {record.Name}");
+
+                ScriptLoader.AddDeferredDialogueChunks(node);
+                _nodeRecord = record;
+                CurrentNode = node;
+                NodeChanged.Invoke(new() { NewNode = node.Name });
+
+                var isLastNode = i == path.Count - 1;
+                var endIndex = isLastNode ? targetDialogueIndex : record.EndDialogue - 1;
+                for (_currentDialogueIndex = 0; _currentDialogueIndex <= endIndex; _currentDialogueIndex++)
+                {
+                    _currentDialogueEntry = node.GetDialogueEntryAt(_currentDialogueIndex);
+                    await UpdateDialogue(_currentDialogueIndex == 0, true, false, token);
+                }
+            }
+
+            // The inner for loop's own increment leaves _currentDialogueIndex at targetDialogueIndex + 1
+            // (one past the entry it just displayed), since the loop condition is re-checked - and fails -
+            // *after* incrementing past the last iteration where _currentDialogueIndex == targetDialogueIndex.
+            // Step() assumes _currentDialogueIndex is always the index of the *currently displayed* entry
+            // (it does ++_currentDialogueIndex itself before showing the next one), so leaving it one too
+            // far ahead here made the first click after a load skip straight past the next entry.
+            _currentDialogueIndex = targetDialogueIndex;
+
+            _state = State.Normal;
+            RestoreStarts.Invoke(false);
+        }
+        catch (Exception e)
+        {
+            Utils.Warn($"Restore failed: {e}");
+            _state = State.Ended;
+            RestoreStarts.Invoke(false);
+        }
+    }
+
+    #endregion
 
     public static GameState Instance => NovaController.Instance.GetObj<GameState>();
 }

@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://dk3h8m2n5q1wt"]
+
+[ext_resource type="Script" path="res://nova/sources/scripts/ui/BacklogEntryController.cs" id="1_bke"]
+[ext_resource type="Theme" uid="uid://c12fchogq4o11" path="res://nova/resources/default_theme.tres" id="2_thm"]
+
+[node name="BacklogEntry" type="HBoxContainer" node_paths=PackedStringArray("_text", "_playVoiceButton")]
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+script = ExtResource("1_bke")
+_text = NodePath("Text")
+_playVoiceButton = NodePath("PlayVoiceButton")
+
+[node name="Text" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+theme = ExtResource("2_thm")
+autowrap_mode = 3
+vertical_alignment = 1
+
+[node name="PlayVoiceButton" type="Button" parent="."]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_vertical = 4
+theme = ExtResource("2_thm")
+text = "♪"

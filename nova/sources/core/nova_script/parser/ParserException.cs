@@ -4,9 +4,16 @@ namespace Nova.Parser;
 
 public class ParserException : Exception
 {
+    public int Line { get; }
+    public int Column { get; }
+
     public ParserException(string msg) : base(msg) { }
     public ParserException(string msg, Exception inner) : base(msg, inner) { }
-    public ParserException(Token token, string msg) : base(ErrorMessage(token, msg)) { }
+    public ParserException(Token token, string msg) : base(ErrorMessage(token, msg))
+    {
+        Line = token.Line;
+        Column = token.Column;
+    }
 
     private static string ErrorMessage(Token token, string msg)
     {

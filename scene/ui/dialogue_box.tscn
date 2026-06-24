@@ -1,10 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://cfrhoyy70iyt1"]
+[gd_scene load_steps=5 format=3 uid="uid://cfrhoyy70iyt1"]
 
 [ext_resource type="Script" path="res://nova/sources/scripts/ui/game_view/DialogueTextController.cs" id="1_bd2kn"]
 [ext_resource type="PackedScene" uid="uid://cp47gcqw6tntd" path="res://scene/ui/dialogue_entry.tscn" id="1_hmxg5"]
 [ext_resource type="Script" path="res://nova/sources/scripts/ui/game_view/DialogueBoxController.cs" id="1_nc15m"]
+[ext_resource type="Script" path="res://nova/sources/scripts/ui/game_view/DialogueFinishIcon.cs" id="1_fnsh1"]
 
-[node name="DialogueBox" type="Control" node_paths=PackedStringArray("_background", "_textController")]
+[node name="DialogueBox" type="Control" node_paths=PackedStringArray("_background", "_textController", "_closeButton", "_finishIcon", "_avatar")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,9 +16,14 @@ mouse_filter = 1
 script = ExtResource("1_nc15m")
 _background = NodePath("ColorRect")
 _textController = NodePath("Text/Entries")
+_closeButton = NodePath("CloseButton")
+_finishIcon = NodePath("FinishIcon")
+_avatar = NodePath("Avatar")
 Opacity = 1.0
 BackgroundColor = Color(0, 0, 0, 1)
 TextColor = Color(1, 1, 1, 1)
+Alignment = "left"
+Outline = false
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -43,3 +49,48 @@ layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("1_bd2kn")
 _entryFactory = ExtResource("1_hmxg5")
+
+[node name="CloseButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -32.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = 28.0
+grow_horizontal = 0
+text = "x"
+
+[node name="Avatar" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 8.0
+offset_top = -60.0
+offset_right = 128.0
+offset_bottom = 60.0
+grow_vertical = 2
+mouse_filter = 2
+stretch_mode = 4
+
+[node name="FinishIcon" type="Label" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -28.0
+offset_top = -28.0
+offset_right = -8.0
+offset_bottom = -4.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+text = "v"
+horizontal_alignment = 1
+script = ExtResource("1_fnsh1")

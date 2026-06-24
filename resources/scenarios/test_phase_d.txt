@@ -1,0 +1,63 @@
+@<|
+label("test_phase_d", "Phase D测试")
+is_unlocked_start()
+|>
+<|
+set_box()
+|>
+测试 Colorless 移植 Phase D 收尾的六个小包装:box_alignment / new_page / box_hide_show(+text_delay) / env_tint / alert / notify,以及顺手修复的 tint() 裸数字颜色解析 bug
+
+<|
+tint("bg", 1)
+|>
+测试1: tint("bg", 1) —— 裸数字颜色重置为白色。以前这里会直接抛类型错误(_get_index 对 int 调用 len 失败),现在应该正常执行,没有报错/没有卡住
+
+<|
+box_alignment("center")
+|>
+测试2: box_alignment("center") —— 这句文字应该居中显示
+
+<|
+box_alignment("left")
+new_page()
+|>
+测试3: box_alignment("left") 切回左对齐 + new_page() 清空上一页 —— 这句应该单独左对齐显示,不会和上一句叠在同一页
+
+<|
+move("gaotian", [0, 0], 0.6)
+show("gaotian", "normal")
+|>
+测试4(准备):显示高天(gaotian)的 normal pose,准备测试 env_tint
+
+<|
+env_tint("gaotian", [1, 0.6, 0.3])
+|>
+测试5: env_tint("gaotian", [1, 0.6, 0.3]) —— 高天的立绘应该整体偏暖橙色(环境光),跟之前没用过的 tint() 通道是相乘叠加关系,不是互相替换
+
+<|
+env_tint("gaotian", 1)
+|>
+测试6: env_tint("gaotian", 1) —— 重置环境光为白色,高天应该恢复原本的颜色
+
+<|
+hide("gaotian")
+box_hide_show(2)
+|>
+测试7: box_hide_show(2) —— 对话框应该立即消失,2秒后自动重新出现。这句文字此刻已经排队等待显示,框重新出现后才应该开始播放文字出现动画(text_delay 在配合默认的瞬间显示模式下不容易看出差别,但不应该报错或卡住)
+
+<|
+alert("这是一个 alert 弹窗,点击确定关闭")
+|>
+测试8: alert() —— 应该弹出一个模态确认框(只有确定按钮),点击确定后才能继续点击推进剧情;弹出期间 Auto/Skip 应该被强制取消
+
+<|
+notify("这是一个 notify 提示,几秒后自动消失")
+|>
+测试9: notify() —— 屏幕下方应该出现一个不挡点击的提示条,自动淡入、停留约2秒、淡出,不需要点击关闭,也不阻塞继续推进剧情
+
+<|
+hide("bg")
+|>
+Phase D 测试结束
+
+@<| is_end() |>

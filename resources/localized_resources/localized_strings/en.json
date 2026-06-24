@@ -37,6 +37,7 @@
     "config.item.fullscreen": "Full screen",
     "config.item.textspeed": "Text speed",
     "config.item.volume.bgm": "Background music",
+    "config.item.volume.bgs": "Ambience",
     "config.item.volume.global": "Global volume",
     "config.item.volume.sound": "Sound effect",
     "config.item.volume.uisound": "System sound",

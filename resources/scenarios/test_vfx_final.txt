@@ -1,0 +1,50 @@
+@<|
+label("test_vfx_final", "VFX测试6")
+is_unlocked_start()
+|>
+<|
+set_box()
+show("bg", "cg/rain_back")
+|>
+测试 VFX(M8 阶段6:收尾综合验证)——依次跑一个来自各阶段的代表特效,中途做一次 S/L 存读档,确认 baseline-reset+重放语义对新特效同样生效(不止阶段0+1验证过的 mono/color)
+
+<|
+vfx("cam", "mono", 0.9, 0.5)
+|>
+阶段1代表:mono 黑白闪回
+
+<|
+vfx("cam", null)
+vfx("cam", "gaussian_blur", 1, 1, { _Size = 30 })
+|>
+阶段2代表:gaussian_blur 高斯模糊。现在按 S 存档,然后继续往下走几步,再按 L 读档,确认能正确回到这一步的模糊状态(不会残留"读档后的当前局面")
+
+<|
+vfx("cam", null)
+vfx("cam", "ripple", 1, 1, { _Amp = 0.05 })
+|>
+阶段3代表:ripple 水波纹扭曲(如果刚才存档后读档回到了上一步,这一步应该是正常按顺序重新走到,扭曲效果正常)
+
+<|
+vfx("cam", null)
+vfx("cam", "glitch", 1, 1)
+|>
+阶段4代表:glitch 故障错位
+
+<|
+vfx("cam", null)
+vfx("cam", "flip_grid", 1, 1.5, { _SubTex = "foregrounds/moon_halo", _GridSize = 60 })
+|>
+阶段5代表:flip_grid 翻页网格转场
+
+<|
+vfx("cam", null)
+|>
+全部清除,画面应完全恢复成最初的 cg/rain_back
+
+<|
+hide("bg")
+|>
+结束:如果以上全部正常,且 S/L 存读档没有出现残留状态串场,M8 全部 37 种特效到此验收完毕
+
+@<| is_end() |>

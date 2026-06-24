@@ -1,0 +1,116 @@
+[gd_scene format=3 uid="uid://c8n5p2law7r4t"]
+
+[ext_resource type="Script" path="res://nova/sources/scripts/ui/view/SaveLoadController.cs" id="1_svl"]
+[ext_resource type="PackedScene" uid="uid://b6h2k8p4v3xqr" path="res://scene/ui/save_entry.tscn" id="2_entry"]
+[ext_resource type="Theme" uid="uid://c12fchogq4o11" path="res://nova/resources/default_theme.tres" id="3_thm"]
+
+[node name="SaveLoadView" type="Control" node_paths=PackedStringArray("_grid", "_quickSaveEntry", "_autoSaveEntry", "_backButton", "_pageLeftButton", "_pageRightButton", "_pageText")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_svl")
+_grid = NodePath("Grid")
+_saveEntryScene = ExtResource("2_entry")
+_quickSaveEntry = NodePath("SpecialColumn/QuickSaveEntry")
+_autoSaveEntry = NodePath("SpecialColumn/AutoSaveEntry")
+_backButton = NodePath("BackButton")
+_pageLeftButton = NodePath("Pager/LeftButton")
+_pageRightButton = NodePath("Pager/RightButton")
+_pageText = NodePath("Pager/PageText")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="BackButton" type="Button" parent="."]
+custom_minimum_size = Vector2(140, 56)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -80.0
+offset_right = 164.0
+offset_bottom = -24.0
+grow_vertical = 0
+theme = ExtResource("3_thm")
+
+[node name="Pager" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -80.0
+offset_right = 200.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="LeftButton" type="Button" parent="Pager"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+theme = ExtResource("3_thm")
+text = "<"
+
+[node name="PageText" type="Label" parent="Pager"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme = ExtResource("3_thm")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightButton" type="Button" parent="Pager"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+theme = ExtResource("3_thm")
+text = ">"
+
+[node name="SpecialColumn" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -780.0
+offset_top = -240.0
+offset_right = -500.0
+offset_bottom = 180.0
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="QuickSaveEntry" parent="SpecialColumn" instance=ExtResource("2_entry")]
+layout_mode = 2
+
+[node name="AutoSaveEntry" parent="SpecialColumn" instance=ExtResource("2_entry")]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -480.0
+offset_top = -340.0
+offset_right = 480.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 3
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20

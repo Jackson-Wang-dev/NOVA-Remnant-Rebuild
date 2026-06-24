@@ -1,11 +1,18 @@
-<Project Sdk="Godot.NET.Sdk/4.2.2">
+<Project Sdk="Godot.NET.Sdk/4.6.3">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net8.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'ios' ">net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Chickensoft.GoDotTest" Version="2.0.35" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'ExportRelease'">
+    <!-- GoDotTest runs in-process inside the actual game (see NovaController._Ready's #if DEBUG
+         branch), not a separate test project, so it has no trouble reaching live singletons like
+         GameState/SaveManager - but that also means test code would ship in the exported game unless
+         excluded here for release builds. -->
+    <Compile Remove="nova/sources/tests/**" />
   </ItemGroup>
 </Project>

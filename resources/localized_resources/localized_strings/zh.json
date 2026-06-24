@@ -37,6 +37,7 @@
     "config.item.fullscreen": "全屏显示",
     "config.item.textspeed": "文字显示速度",
     "config.item.volume.bgm": "背景音乐",
+    "config.item.volume.bgs": "环境音",
     "config.item.volume.global": "全局音量",
     "config.item.volume.sound": "音效",
     "config.item.volume.uisound": "系统音效",

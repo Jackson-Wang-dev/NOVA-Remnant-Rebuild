@@ -1,0 +1,55 @@
+@<|
+label("test_pose")
+is_unlocked_start()
+|>
+<|
+set_box()
+|>
+测试立绘合成系统(M5)
+
+<|
+move("ergong", [-3, 0], 0.4)
+show("ergong", "normal")
+|>
+M5 测试:陈二宫(ergong)立即显示 normal pose,缩小到 0.4 倍大小
+
+<|
+move("gaotian", [-1, 0], 0.4)
+show("gaotian", "normal")
+|>
+M5 测试:高天(gaotian)同样显示 normal pose,跟陈二宫并排站好
+
+<|
+show("gaotian", "cry", null, null, 1.0)
+|>
+M5 测试:高天切换到 cry pose,1 秒交叉淡出/淡入(只有眼睛部件变化)
+
+<|
+move("qianye", [1, 0], 0.4)
+show("qianye", "normal")
+move("xiben", [3, 0], 0.4)
+show("xiben", "normal")
+|>
+M5 测试:张浅野(qianye)、孙西本(xiben)也显示出来,四个角色应该都对齐良好,没有部件错位
+
+<|
+hide("qianye")
+hide("xiben")
+|>
+M5 测试:暂时隐藏张浅野、孙西本,给下面的重叠测试腾地方
+
+<|
+move("ergong", [-0.6, 0, 0.02], 0.4)
+move("gaotian", [0.6, 0, 0], 0.4)
+|>
+M5 测试(层级遮挡):陈二宫移到 z=0.02(更靠前)、高天移到 z=0(更靠后),两人故意挪到重叠——陈二宫应该完整遮住高天,高天的头发/眼睛不应该穿插到陈二宫前面
+
+<|
+hide("gaotian")
+hide("ergong")
+|>
+M5 测试结束,清空所有角色
+
+第一章结束
+
+@<| is_end() |>

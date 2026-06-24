@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Godot;
 
 namespace Nova;
@@ -27,15 +28,44 @@ public static class GDRuntime
         return gdScript.New().As<RefCounted>();
     }
 
+    // Matches, in priority order: a quoted string (left untouched - avoids rewriting a v_/gv_-looking
+    // substring inside a string literal, e.g. an asset path, since this operates on raw script text
+    // rather than a real AST); a v_/gv_ identifier immediately followed by a simple "=" (an assignment
+    // target, e.g. "v_flag = 1" - rewritten to a dot-assignment "self.v_flag = 1", which GDScript routes
+    // through RuntimeBlock's _set with no ambiguity, see base_block.gd/condition_block.gd); any other
+    // v_/gv_ identifier (a read - rewritten to self.get("v_flag") rather than bare "self.v_flag", since
+    // GDScript's dot-read syntax treats a bare-null _get return as "property does not exist" and raises
+    // a hard runtime error, whereas Object.get() safely returns null for an unset variable like Lua's
+    // nil). The negative lookahead "(?!=)" on the assignment case excludes "==" (equality, a read).
+    private static readonly Regex s_variableToken = new(
+        "\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'|" +
+        "\\b(?<write>g?v_\\w+)\\b(?=\\s*=(?!=))|\\b(?<read>g?v_\\w+)\\b", RegexOptions.Compiled);
+
+    private static string RewriteVariables(string script)
+    {
+        return s_variableToken.Replace(script, m =>
+        {
+            if (m.Groups["write"].Success)
+            {
+                return $"self.{m.Groups["write"].Value}";
+            }
+            if (m.Groups["read"].Success)
+            {
+                return $"self.get(\"{m.Groups["read"].Value}\")";
+            }
+            return m.Value;
+        });
+    }
+
     private static string WrapStatements(string baseClass, string script)
     {
-        script = string.IsNullOrWhiteSpace(script) ? "" : script.Trim().Replace("\n", "\n    ");
+        script = string.IsNullOrWhiteSpace(script) ? "" : RewriteVariables(script).Trim().Replace("\n", "\n    ");
         return $"extends {baseClass}\nfunc __eval():\n    pass\n    {script}\n";
     }
 
     private static string WrapExpression(string baseClass, string script)
     {
-        return $"extends {baseClass}\nfunc __eval():\n    return {script.Trim()}\n";
+        return $"extends {baseClass}\nfunc __eval():\n    return {RewriteVariables(script.Trim())}\n";
     }
 
     public static RefCounted CompileBaseBlock(string script)

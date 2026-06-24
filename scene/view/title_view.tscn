@@ -45,6 +45,20 @@ theme = ExtResource("5_y4mjs")
 script = ExtResource("2_g24vv")
 InflateTextKey = "title.menu.start"
 
+[node name="Load" type="Button" parent="Menu"]
+custom_minimum_size = Vector2(320, 80)
+layout_mode = 2
+theme = ExtResource("5_y4mjs")
+script = ExtResource("2_g24vv")
+InflateTextKey = "title.menu.load"
+
+[node name="Settings" type="Button" parent="Menu"]
+custom_minimum_size = Vector2(320, 80)
+layout_mode = 2
+theme = ExtResource("5_y4mjs")
+script = ExtResource("2_g24vv")
+InflateTextKey = "title.menu.config"
+
 [node name="QuitGame" type="Button" parent="Menu"]
 custom_minimum_size = Vector2(320, 80)
 layout_mode = 2
@@ -53,4 +67,6 @@ script = ExtResource("2_g24vv")
 InflateTextKey = "title.menu.quit"
 
 [connection signal="pressed" from="Menu/StartGame" to="." method="OnStartGame"]
+[connection signal="pressed" from="Menu/Load" to="." method="OnLoad"]
+[connection signal="pressed" from="Menu/Settings" to="." method="OnSettings"]
 [connection signal="pressed" from="Menu/QuitGame" to="." method="OnQuit"]

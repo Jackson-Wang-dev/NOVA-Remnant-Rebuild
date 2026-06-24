@@ -2,6 +2,60 @@
 
 class_name RuntimeBlock extends RefCounted
 
+## AlertHelper
+func alert(text: String):
+	AlertHelper.alert(text)
+func notify(text: String):
+	AlertHelper.notify(text)
+
+## AnimHelper
+func wait(duration: float, entry=null):
+	return AnimHelper.wait(duration, entry)
+func wait_all(target_entry, entry=null):
+	return AnimHelper.wait_all(target_entry, entry)
+func loop(func_: Callable, entry=null):
+	return AnimHelper.loop(func_, entry)
+func anim_hold_begin():
+	AnimHelper.anim_hold_begin()
+func anim_hold_end():
+	AnimHelper.anim_hold_end()
+func cam_punch(entry=null):
+	return AnimHelper.cam_punch(entry)
+func auto_step():
+	AnimHelper.auto_step()
+
+## Audio
+func play(channel: Variant, track_name: String, vol=0.5, duration=null):
+	Audio.play(channel, track_name, vol, duration)
+func stop(channel: Variant, duration=null):
+	Audio.stop(channel, duration)
+func volume(channel: Variant, value: float, duration=null, entry=null):
+	return Audio.volume(channel, value, duration, entry)
+func fade_in(channel: Variant, track_name: String, vol=0.5, duration=1.0, entry=null):
+	return Audio.fade_in(channel, track_name, vol, duration, entry)
+func fade_out(channel: Variant, duration=1.0, entry=null):
+	return Audio.fade_out(channel, duration, entry)
+func sound(track_name: String, vol=0.5):
+	Audio.sound(track_name, vol)
+func say(speaker_name: String, voice_name: String, delay=0.0, override_auto_voice=true):
+	Audio.say(speaker_name, voice_name, delay, override_auto_voice)
+func auto_voice_on(name: String, index: Variant):
+	Audio.auto_voice_on(name, index)
+func auto_voice_off(name: String):
+	Audio.auto_voice_off(name)
+func auto_voice_off_all():
+	Audio.auto_voice_off_all()
+func set_auto_voice_delay(value: float):
+	Audio.set_auto_voice_delay(value)
+
+## Avatar
+func avatar(pose, color=null):
+	Avatar.avatar(pose, color)
+func avatar_hide(name=null):
+	Avatar.avatar_hide(name)
+func avatar_clear():
+	Avatar.avatar_clear()
+
 ## BuiltIn
 static var o:
 	get: return BuiltIn.o
@@ -10,21 +64,53 @@ static var c:
 	get: return BuiltIn.c
 	set(value): BuiltIn.c = value
 func pop_prefix(s: String, prefix: String, sep_len: int=0):
-	BuiltIn.pop_prefix(s, prefix, sep_len)
+	return BuiltIn.pop_prefix(s, prefix, sep_len)
 
 ## DialogueBox
-func set_box(pos_name="bottom"):
-	DialogueBox.set_box(pos_name)
+func set_box(pos_name="bottom", style_name=null):
+	DialogueBox.set_box(pos_name, style_name)
+func set_text_appear(mode=0, char_speed=30.0, fade_duration=0.3):
+	DialogueBox.set_text_appear(mode, char_speed, fade_duration)
+func box_alignment(mode="left"):
+	DialogueBox.box_alignment(mode)
+func new_page():
+	DialogueBox.new_page()
+func text_delay(time: float):
+	DialogueBox.text_delay(time)
+func box_hide_show(duration=1.0, pos_name="bottom", style_name=null):
+	DialogueBox.box_hide_show(duration, pos_name, style_name)
+func allow_skip_unread(value=true):
+	DialogueBox.allow_skip_unread(value)
+func stop_auto_skip():
+	DialogueBox.stop_auto_skip()
 
 ## Graphics
-func move(obj: Variant, coord: Variant, scale=null, angle=null):
-	Graphics.move(obj, coord, scale, angle)
-func tint(obj, color):
-	Graphics.tint(obj, color)
-func show(obj, image_path, coord=null, color=null):
-	Graphics.show(obj, image_path, coord, color)
+func move(obj: Variant, coord: Variant, scale=null, angle=null, duration=null, entry=null):
+	return Graphics.move(obj, coord, scale, angle, duration, entry)
+func tint(obj, color, duration=null, entry=null):
+	return Graphics.tint(obj, color, duration, entry)
+func env_tint(obj, color, duration=null, entry=null):
+	return Graphics.env_tint(obj, color, duration, entry)
+func show(obj, image_path, coord=null, color=null, duration=null):
+	Graphics.show(obj, image_path, coord, color, duration)
 func hide(obj):
 	Graphics.hide(obj)
+func vfx(obj: Variant, shader_layer: Variant, t=1.0, duration=null, properties=null, entry=null):
+	return Graphics.vfx(obj, shader_layer, t, duration, properties, entry)
+func trans(obj: Variant, image_name_or_func: Variant, shader_name: String, duration=1.0, properties=null, color2=null, entry=null):
+	return Graphics.trans(obj, image_name_or_func, shader_name, duration, properties, color2, entry)
+func trans_fade(obj: Variant, image_name_or_func: Variant, duration=1.0, entry=null):
+	return Graphics.trans_fade(obj, image_name_or_func, duration, entry)
+func trans_left(obj: Variant, image_name_or_func: Variant, duration=1.0, entry=null):
+	return Graphics.trans_left(obj, image_name_or_func, duration, entry)
+func trans_right(obj: Variant, image_name_or_func: Variant, duration=1.0, entry=null):
+	return Graphics.trans_right(obj, image_name_or_func, duration, entry)
+func trans_up(obj: Variant, image_name_or_func: Variant, duration=1.0, entry=null):
+	return Graphics.trans_up(obj, image_name_or_func, duration, entry)
+func trans_down(obj: Variant, image_name_or_func: Variant, duration=1.0, entry=null):
+	return Graphics.trans_down(obj, image_name_or_func, duration, entry)
+func trans2(obj: Variant, image_name_or_func: Variant, shader_layer: Variant, duration=1.0, properties=null, duration2=null, properties2=null, color2=null, entry=null):
+	return Graphics.trans2(obj, image_name_or_func, shader_layer, duration, properties, duration2, properties2, color2, entry)
 
 ## ScriptLoader
 func action_new_file(filename: String):
@@ -41,8 +127,22 @@ func is_start():
 	ScriptLoader.is_start()
 func is_unlocked_start():
 	ScriptLoader.is_unlocked_start()
+func is_default_start():
+	ScriptLoader.is_default_start()
 func is_debug():
 	ScriptLoader.is_debug()
 func is_end(name=null):
 	ScriptLoader.is_end(name)
+
+## TimeScrollHelper
+func time_scroll(from_year, from_month, from_day, from_hour, from_min, from_sec, to_year, to_month, to_day, to_hour, to_min, to_sec, mid_duration=2.0, entry=null):
+	return TimeScrollHelper.time_scroll(from_year, from_month, from_day, from_hour, from_min, from_sec, to_year, to_month, to_day, to_hour, to_min, to_sec, mid_duration, entry)
+
+## VideoHelper
+func video(video_name: String):
+	VideoHelper.video(video_name)
+func video_hide():
+	VideoHelper.video_hide()
+func video_play(duration=null, entry=null):
+	return VideoHelper.video_play(duration, entry)
 

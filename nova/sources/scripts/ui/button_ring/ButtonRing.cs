@@ -4,10 +4,11 @@ using Godot;
 
 namespace Nova;
 
-public readonly struct ButtonRingItem(string actionI18nName, CompressedTexture2D activeSprite)
+public readonly struct ButtonRingItem(string actionI18nName, string labelKey, CompressedTexture2D activeSprite)
 {
     public readonly CompressedTexture2D ActiveSprite = activeSprite;
     public readonly string ActionI18nName = actionI18nName;
+    public readonly string LabelKey = labelKey;
 }
 
 public partial class ButtonRing : Control
@@ -23,6 +24,21 @@ public partial class ButtonRing : Control
     [Export]
     private string _textureFolder = "res://resources/button_ring";
 
+    // Maps each wedge's numeric dispatch action (see GameViewInput.DispatchRingAction) to the i18n
+    // key for its hover label - the localized strings already had exactly these 8 ingame.*.button
+    // keys sitting unused, one per sector.
+    private static readonly string[] SectorLabelKeys =
+    [
+        "ingame.log.button",
+        "ingame.auto.button",
+        "ingame.quicksave.button",
+        "ingame.save.button",
+        "ingame.config.button",
+        "ingame.load.button",
+        "ingame.quickload.button",
+        "ingame.fastforward.button",
+    ];
+
     private List<ButtonRingItem> _sectors = [];
     private float _sectorRadius = 200.0f;
     private Vector2 _preCalculatedAnchorPos;
@@ -34,11 +50,11 @@ public partial class ButtonRing : Control
         // Clockwise is positive, counterclockwise is negative.
         // In order to adjust the display of the button ring according to the sector index,
         // We have adjusted the order in which the sectors are added.
-        _sectors.Add(new(" ", GD.Load<CompressedTexture2D>($"{_textureFolder}/button_ring_0.png")));
+        _sectors.Add(new(" ", "", GD.Load<CompressedTexture2D>($"{_textureFolder}/button_ring_0.png")));
         for (var i = 8; i >= 1; i--)
         {
             var texture = GD.Load<CompressedTexture2D>($"{_textureFolder}/button_ring_{i}.png");
-            _sectors.Add(new(i.ToString(), texture));
+            _sectors.Add(new(i.ToString(), SectorLabelKeys[i - 1], texture));
         }
     }
 
@@ -52,7 +68,8 @@ public partial class ButtonRing : Control
         if (index < 0 || index >= _sectors.Count) return;
 
         _ringBackground.Texture = _sectors[index].ActiveSprite;
-        _actionNameText.Text = _sectors[index].ActionI18nName;
+        var labelKey = _sectors[index].LabelKey;
+        _actionNameText.Text = string.IsNullOrEmpty(labelKey) ? "" : I18n.__(labelKey);
     }
 
 
@@ -87,13 +104,25 @@ public partial class ButtonRing : Control
     private int GetSectorIndexAtAngle(float angle)
     {
         var sectorRange = 360f / 8;
-        var index = (int)(angle / sectorRange);
+        var index = (int)(angle / sectorRange) % 8;
         if (index < 0)
         {
-            index += _sectors.Count;
+            index += 8;
         }
 
         return index;
+    }
+
+    /// <summary>
+    /// The numeric label of the sector currently hovered (matching the wedge icons baked into the
+    /// button_ring_N.png assets, e.g. "4" = save, "6" = load), or null if the pointer is over the
+    /// center (no selection). Resets the selection so a second confirm without re-hovering is a no-op.
+    /// </summary>
+    public string ConfirmSelection()
+    {
+        var name = _selectedSectorIndex >= 0 ? _sectors[_selectedSectorIndex + 1].ActionI18nName : null;
+        _selectedSectorIndex = -1;
+        return name;
     }
 
     public override void _Input(InputEvent @event)
