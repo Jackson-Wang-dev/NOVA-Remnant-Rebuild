@@ -62,6 +62,22 @@ public static class DialogueEntryParser
         return Utils.HashList(chunk.SelectMany(block => block.ToList()));
     }
 
+    private static int CountLines(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return 0;
+        }
+
+        return text.Count(c => c == '\n');
+    }
+
+    private static void GetChunkLineRange(ParsedBlocks chunk, out int startLine, out int endLine)
+    {
+        startLine = chunk.Min(block => block.Line);
+        endLine = chunk.Max(block => block.Line + CountLines(block.Content));
+    }
+
     private static DialogueEntry ParseDialogueEntry(ParsedBlocks chunk, Dictionary<string, string> hiddenNames)
     {
         var text = NovaParser.GetText(chunk);
@@ -119,7 +135,9 @@ public static class DialogueEntryParser
             }
         }
 
-        var entry = new DialogueEntry(characterName, displayName, dialogue, actions, GetChunkHash(chunk));
+        GetChunkLineRange(chunk, out var sourceStartLine, out var sourceEndLine);
+        var entry = new DialogueEntry(characterName, displayName, dialogue, actions, GetChunkHash(chunk),
+            sourceStartLine, sourceEndLine);
 
         if (mmrText != null || dmgText != null)
         {

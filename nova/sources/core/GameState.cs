@@ -451,6 +451,78 @@ public partial class GameState : ISingleton
     }
 
 #if DEBUG
+    internal readonly struct LocateResult()
+    {
+        public bool Ok { get; init; }
+        public string Error { get; init; }
+        public string NodeName { get; init; }
+        public int DialogueIndex { get; init; }
+        public int NodeRecordId { get; init; }
+        public bool Reached { get; init; }
+    }
+
+    internal LocateResult Locate(string file, int line)
+    {
+        if (string.IsNullOrEmpty(file))
+        {
+            return new LocateResult { Ok = false, Error = "Missing file" };
+        }
+
+        if (line <= 0)
+        {
+            return new LocateResult { Ok = false, Error = "Line must be positive" };
+        }
+
+        FlowChartNode matchedNode = null;
+        var matchedDialogueIndex = -1;
+        foreach (var node in _flowChartGraph)
+        {
+            if (!string.Equals(node.SourceFile, file, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(node.SourceFile, System.IO.Path.GetFileName(file), StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            ScriptLoader.AddDeferredDialogueChunks(node);
+            for (var i = 0; i < node.DialogueEntryCount; i++)
+            {
+                var entry = node.GetDialogueEntryAt(i);
+                if (entry.SourceStartLine <= line && line <= entry.SourceEndLine)
+                {
+                    matchedNode = node;
+                    matchedDialogueIndex = i;
+                    break;
+                }
+            }
+
+            if (matchedNode != null)
+            {
+                break;
+            }
+        }
+
+        if (matchedNode == null)
+        {
+            return new LocateResult { Ok = false, Error = $"No dialogue entry found for {file}:{line}" };
+        }
+
+        var record = SaveManager.Instance.LocateReachedNodeRecord(
+            matchedNode.Name, matchedDialogueIndex, CurrentNodeRecordId);
+        if (matchedNode == CurrentNode && matchedDialogueIndex > CurrentDialogueIndex)
+        {
+            record = null;
+        }
+
+        return new LocateResult
+        {
+            Ok = true,
+            NodeName = matchedNode.Name,
+            DialogueIndex = matchedDialogueIndex,
+            NodeRecordId = record?.Id ?? NodeRecord.NoId,
+            Reached = record != null
+        };
+    }
+
     /// <summary>
     /// Dev-only hot reload, mirroring Nova1's ReloadScriptsHelper (R key): re-parse the current
     /// scenario files from disk and resume at roughly the same position. ScriptLoader.OnEnter() is

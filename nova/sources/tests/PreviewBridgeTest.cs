@@ -142,4 +142,24 @@ public class PreviewBridgeTest : TestClass
         response.ShouldContain("\"ok\":true");
         response.ShouldContain("\"state\":{");
     }
+    [Test]
+    public void Locate_ReturnsDialoguePosition()
+    {
+        var gameState = GameState.Instance;
+        gameState.StartGame("test_animation");
+        gameState.Step();
+
+        var client = new System.Net.Sockets.TcpClient();
+        client.Connect(System.Net.IPAddress.Loopback, PreviewBridge.Instance.Port);
+        var stream = client.GetStream();
+
+        var response = SendAndReceive(stream, "{\"id\":5,\"method\":\"locate\",\"params\":{\"file\":\"test_animation.txt\",\"line\":15}}\n");
+        client.Close();
+
+        response.ShouldContain("\"ok\":true");
+        response.ShouldContain("\"nodeName\":\"test_animation\"");
+        response.ShouldContain("\"dialogueIndex\":1");
+        response.ShouldContain("\"nodeRecordId\":");
+        response.ShouldContain("\"reached\":true");
+    }
 }

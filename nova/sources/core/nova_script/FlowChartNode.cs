@@ -28,6 +28,8 @@ public class FlowChartNode(string name)
     /// </summary>
     public readonly string Name = name;
 
+    public string SourceFile { get; set; }
+
     // hash value from text of the script
     public ulong TextHash;
 

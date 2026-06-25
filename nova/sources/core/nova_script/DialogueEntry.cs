@@ -41,7 +41,7 @@ public readonly struct DialogueDisplayData()
 /// A dialogue entry contains the character name and the dialogue text in each locale, and the actions to execute.
 /// </summary>
 public class DialogueEntry(string characterName, string displayName, string dialogue,
-    Dictionary<DialogueActionStage, RefCounted> actions, ulong textHash)
+    Dictionary<DialogueActionStage, RefCounted> actions, ulong textHash, int sourceStartLine, int sourceEndLine)
 {
     /// <summary>
     /// Internally used character name.
@@ -64,6 +64,10 @@ public class DialogueEntry(string characterName, string displayName, string dial
     private readonly Dictionary<DialogueActionStage, RefCounted> _actions = actions;
 
     public readonly ulong TextHash = textHash;
+
+    public readonly int SourceStartLine = sourceStartLine;
+
+    public readonly int SourceEndLine = sourceEndLine;
 
     public void AddLocalized(string locale, LocalizedDialogueEntry entry)
     {

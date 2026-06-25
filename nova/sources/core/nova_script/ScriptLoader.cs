@@ -25,6 +25,7 @@ public partial class ScriptLoader(string path) : RefCounted, ISingleton
 
     private string _currentLocale;
     private FlowChartNode _currentNode;
+    private string _currentFileName;
 
     private readonly struct LazyBindingEntry()
     {
@@ -63,6 +64,7 @@ public partial class ScriptLoader(string path) : RefCounted, ISingleton
             foreach (var fileName in DirAccess.GetFilesAt(localizedPath))
             {
                 GDRuntime.BaseRuntimeBlock.Call("action_new_file", fileName);
+                _currentFileName = fileName;
                 var script = Utils.GetFileAsText(localizedPath + "/" + fileName);
                 try
                 {
@@ -227,6 +229,10 @@ public partial class ScriptLoader(string path) : RefCounted, ISingleton
     public void RegisterNewNode(string name, string displayName)
     {
         var nextNode = new FlowChartNode(name);
+        if (_currentLocale == I18n.DefaultLocale)
+        {
+            nextNode.SourceFile = _currentFileName;
+        }
         if (_currentNode != null && _currentNode.Type == FlowChartNodeType.Normal)
         {
             _currentNode.AddBranch(new() { NextNode = nextNode });

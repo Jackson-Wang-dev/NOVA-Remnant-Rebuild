@@ -263,6 +263,20 @@ public class PreviewBridge : ISingleton
             case "get_state":
                 result = HandleGetState();
                 break;
+            case "locate":
+                {
+                    var file = GetStringParam(parameters, "file");
+                    var line = GetIntParam(parameters, "line");
+                    if (!string.IsNullOrEmpty(file) && line.HasValue)
+                    {
+                        result = HandleLocate(file, line.Value);
+                    }
+                    else
+                    {
+                        result = new { ok = false, error = new { message = "Missing file or line" } };
+                    }
+                    break;
+                }
             default:
                 result = new { ok = false, error = new { message = $"Unknown method: {method}" } };
                 break;
@@ -285,6 +299,11 @@ public class PreviewBridge : ISingleton
             if (val is string s && int.TryParse(s, out var parsed)) return parsed;
         }
         return null;
+    }
+
+    private static string GetStringParam(Dictionary<string, object> parameters, string key)
+    {
+        return parameters.TryGetValue(key, out var val) ? val as string : null;
     }
 
     private object HandleReload()
@@ -340,6 +359,31 @@ public class PreviewBridge : ISingleton
                 startNodeNames
             }
         };
+    }
+
+    private object HandleLocate(string file, int line)
+    {
+        try
+        {
+            var result = GameState.Instance.Locate(file, line);
+            if (!result.Ok)
+            {
+                return new { ok = false, error = new { message = result.Error } };
+            }
+
+            return new
+            {
+                ok = true,
+                nodeName = result.NodeName,
+                dialogueIndex = result.DialogueIndex,
+                nodeRecordId = result.Reached ? result.NodeRecordId : (int?)null,
+                reached = result.Reached
+            };
+        }
+        catch (Exception e)
+        {
+            return new { ok = false, error = new { message = e.Message } };
+        }
     }
 
     private void SendResponse(NetworkStream replyStream, int requestId, object response)

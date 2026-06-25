@@ -310,6 +310,32 @@ public class SaveManager : ISingleton
         return path;
     }
 
+#if DEBUG
+    public NodeRecord LocateReachedNodeRecord(string nodeName, int dialogueIndex, int currentNodeRecordId)
+    {
+        var matches = _nodeRecords.Values
+            .Where(record => record.Name == nodeName &&
+                record.BeginDialogue <= dialogueIndex && dialogueIndex < record.EndDialogue)
+            .ToList();
+
+        if (matches.Count == 0)
+        {
+            return null;
+        }
+
+        if (currentNodeRecordId != NodeRecord.NoId && _nodeRecords.ContainsKey(currentNodeRecordId))
+        {
+            var pathIds = GetPathTo(currentNodeRecordId).Select(record => record.Id).ToHashSet();
+            return matches
+                .Where(record => pathIds.Contains(record.Id))
+                .OrderByDescending(record => record.Id)
+                .FirstOrDefault();
+        }
+
+        return matches.OrderByDescending(record => record.Id).First();
+    }
+#endif
+
     #endregion
 
     #region Bookmarks
