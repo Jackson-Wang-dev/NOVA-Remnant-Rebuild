@@ -9,7 +9,7 @@ NovaRR（原 nova2）是 [Nova1](https://github.com/Lunatic-Works/Nova)（Unity 
 - VVN 仓库：https://github.com/Jackson-Wang-dev/Vibe-Visual-Novel
 - **完整的"如何配合使用"说明在 VVN 仓库的 README 里**，包含环境准备、两个仓库怎么连起来、首次配置、完整工作流程和排错。
 
-VVN 通过本机 TCP（`PreviewBridge`，只在 Debug 构建里编译）远程控制这个工程：热重载剧本（`reload`）、跳转到指定剧情位置预览（`seek`）、按文件和行号定位剧情位置（`locate`）。不想用 VVN，也可以只用下面的方式独立打开、运行这个工程。
+VVN 通过本机 TCP（`PreviewBridge`，只在 Debug 构建里编译）远程控制这个工程：热重载剧本（`reload`）、跳转到指定剧情位置预览（`seek`）、按文件和行号定位剧情位置（`locate`）。在 VVN 里生成/改写脚本成功后，预览会用 `locate` 自动停到本次首个改动行对应的已到达剧情位置；如果改动在尚未走到的分支或定位失败，则保持当前位置，不影响生成结果。不想用 VVN，也可以只用下面的方式独立打开、运行这个工程。
 VVN 的AI服务在本地运行，尚未挂载到服务器上，所以Deepseek的API Key是透明的。目前为止，里面应该还有9元余额（6/24/2026），大家可以在VVN的设置界面换成自己的API key，也可以用我的（且用且珍惜）。
 
 ## 独立运行 NovaRR
