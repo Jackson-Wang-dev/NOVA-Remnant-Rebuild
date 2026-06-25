@@ -181,6 +181,7 @@ v_flag = 0
 | `trans2` | `trans2(obj, image_name_or_func, shader_layer, duration=1.0, properties=null, duration2=null, properties2=null, color2=null, entry=null)` | 通用"推高 `_T`(遮住)→中途换内容/触发回调→推回 `_T`(揭示)"序列,复用任意 `vfx()` 用过的 shader(不限于 fade 系列,比如 `radial_blur`)。`image_name_or_func` 可以是 `null`(纯特效,不换图)。 |
 
 `obj` 的常见绑定名:`"bg"`(背景)/`"fg"`(前景/CG 叠加层)/`"cam"`(主摄像机)/`"cg"`(独立 CG 层)/角色立绘的绑定名(脚本里用中文拼音或角色 key,具体看 `game.tscn`/`ObjectBinder` 配置)。
+> VFX 约束: `resources/shaders/*.gdshader` 分两条管线。`shader_type canvas_item` 是全屏后处理,只能写成 `vfx("cam", "shader")` 或 `vfx("cam", ["shader", layer])`;比如 `rain`/`color`/`mono`/`shake` 都属于这一类。不要把它们挂到 `"bg"`/`"fg"`/`"cg"`/角色上,否则背景 Sprite3D 会拿到不兼容材质并退成灰黑/纯色画面。需要背景上有雨幕时,用 `vfx("cam", ["rain", 1], ...)` 另开一个 cam 图层,再用 `vfx("cam", [null, 1])` 清掉。`shader_type spatial` 才能用于 `"bg"` 等非 cam 对象。
 
 ### 4.3 对话框(`DialogueBox`)
 

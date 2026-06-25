@@ -156,6 +156,9 @@ static func vfx(obj: Variant, shader_layer: Variant, t=1.0, duration=null, prope
 		if shader_name == null:
 			o.vfx.ClearState(obj.Binding)
 			return entry
+		if _shader_type(shader_name) == "canvas_item":
+			push_warning("Shader '", shader_name, "' is a canvas_item post-processing shader and can only be used on \"cam\". Ignoring vfx() on ", obj.Binding)
+			return entry
 		state = o.vfx.GetState(obj.Binding, shader_name)
 
 	_apply_vfx_properties(state, properties)
@@ -164,6 +167,16 @@ static func vfx(obj: Variant, shader_layer: Variant, t=1.0, duration=null, prope
 	else:
 		state.set("shader_parameter/_T", t)
 		return entry
+
+static func _shader_type(shader_name: String) -> String:
+	var file = FileAccess.open(c.resource_root + "shaders/" + shader_name + ".gdshader", FileAccess.READ)
+	if file == null:
+		return ""
+	while not file.eof_reached():
+		var line = file.get_line().strip_edges()
+		if line.begins_with("shader_type"):
+			return line.trim_prefix("shader_type").strip_edges().trim_suffix(";").strip_edges()
+	return ""
 
 # immediate=true ALSO writes straight to the real ShaderMaterial (state.Binding), on top of the
 # normal deferred state.set() - needed by trans()/trans2()'s setup steps, which run in the same
