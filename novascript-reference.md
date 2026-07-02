@@ -74,7 +74,11 @@ some_cleanup()
 
 > ⚠️ **硬性约束,比上面这条"自动补 `is_end()`"更重要**:这个自动补全只重置节点*类型*,不会把节点末尾那段对话文本解析成 `DialogueEntry`——节点末尾的对话/lazy 块只有在被**紧跟着的下一个 eager 块**(下一个 `label()`,或 `is_end()`/`jump_to()`/`branch()`)触发时才会真正被解析并挂到节点上(`ScriptLoader.ParseScript` 的实现:只有遇到 eager 块才会 flush 累积的 chunk 列表,循环结束后没有任何收尾 flush)。如果一个文件的最后一个节点,在它最后一段对话文本之后**没有任何 eager 块**收尾,这段文本会被静默丢弃,整个节点 `DialogueEntryCount` 变成 0——玩家一进入这个节点就会立刻触发"到达末尾"逻辑(`StepAtEndOfNode`),什么对话都看不到。**结论:每个文件的最后一个节点,即使只是"普通无名结局"也必须显式写一个 `@<| is_end() |>`(或 `jump_to`/`branch`)收尾,不能依赖"反正会自动标记成结局"就省略掉这一行。**(`test_backlog.txt` 曾经漏写过这一行,导致整个节点 0 条对话记录,2026-06-22 审计时发现并修复,见 `porting-guide.md` 决策记录。)
 
-节点名前缀 `l_` 表示"局部名字"(自动拼上当前文件名,避免不同文件里同名 label 冲突),`label("l_begin_loop")`/`jump_to("l_begin_loop")`/`branch` 的 `dest` 都能用这个前缀,同一文件内互相跳转推荐用 `l_` 前缀。
+节点名前缀 `l_` 表示"文件局部节点":引擎在注册时自动拼上当前文件名,避免不同文件里同名 `label` 冲突("Overwrite node"报错)。规则如下:
+
+- **文件内部节点必须加 `l_` 前缀**:`label`/`jump_to`/`branch` 的 `dest` 只要是"只在本文件内跳转用的"节点,都必须带 `l_`。
+- **全局入口节点不加前缀**:章节入口(如 `label("ch1", "第一章")`)需要从外部可达,必须是全局名,不能带 `l_`。
+- **AUTOSTAGE 自动处理**:VVN 的 `build_node_skeleton` 生成骨架时,所有通过 `#node:` 声明的内部节点自动加 `l_` 前缀——`label`、所有 `branch dest`、所有 `jump_to` 目标一并处理,无需手写。主入口 label(由 `base_label` 或用户指定的标签名决定)始终保持全局。
 
 #### 分支语法
 
@@ -170,7 +174,7 @@ v_flag = 0
 
 | 函数 | 签名 | 说明 |
 |---|---|---|
-| `show` | `show(obj, image_path, coord=null, color=null, duration=null)` | 显示一张图/一个立绘 pose。`obj` 是绑定对象名(`"bg"`/`"fg"`/`"cam"`/某个角色绑定名等);若 `obj` 是立绘合成对象,`image_path` 是 pose 名(走 `Character.get_pose` 别名表),否则是 `resources/` 下的图片相对路径(不带扩展名)。`coord`/`color` 给了就顺带调一次 `move`/`tint`。 |
+| `show` | `show(obj, image_path, coord=null, color=null, duration=null)` | 显示一张图/一个立绘 pose。`obj` 是绑定对象名(`"bg"`/`"fg"`/`"cam"`/某个角色绑定名等)。**`image_path` 用法因 `obj` 类型而异**:<br>• `obj` 是**立绘合成对象**(角色绑定名,如 `"ergong"`):第二参数必须是 **pose 别名**,即 `character.gd` 里 `poses` 字典定义的键名(如 `"normal"`/`"cry"`),引擎再通过 `Character.get_pose` 查出对应的合成部件串。**禁止直接传 `"standings/…"` 路径**——那是引擎内部的合成图层路径,不是 NovaScript 的 API 参数,传了不会报错但角色不会显示。<br>• `obj` 是**非立绘对象**(`"bg"`/`"fg"`/`"cg"` 等):第二参数是 `resources/` 下的图片相对路径(不带扩展名),如 `"backgrounds/room"`。<br>`coord`/`color` 给了就顺带调一次 `move`/`tint`。**`coord` 必须是恰好 5 个元素的数组 `[x, y, scale, rx, ry]`**,缺元素会越界崩溃导致角色不显示;`y` 通常取 `-0.3`(让角色底部对齐画面底边),`rx`/`ry` 通常为 `0`。典型布局参考:单人居中 `[0,-0.3,0.53,0,0]`;两人并排 `[-2,-0.3,0.53,0,0]` 和 `[2,-0.3,0.53,0,0]`;四人 `[-3,-0.3,0.4,0,0]`/`[-1,-0.3,0.4,0,0]`/`[1,-0.3,0.4,0,0]`/`[3,-0.3,0.4,0,0]`;x 绝对值小于 1 的多人布局会导致立绘重叠。 |
 | `hide` | `hide(obj)` | 隐藏。 |
 | `move` | `move(obj, coord, scale=null, angle=null, duration=null, entry=null)` | `coord` 是 `[x, y, scale, z, angle]` 简写数组(对应位形,5 个槛位都可以传 `null` 跳过那一项),也可以直接传 `Vector3`。`duration` 给了就动画过渡,否则瞬间生效。`obj=="cam"` 时 `scale` 改写相机的 `size`(正交相机缩放),不是真的缩放变换。 |
 | `tint` | `tint(obj, color, duration=null, entry=null)` | 染色(`modulate`,立绘对象走专属的 `Modulate`)。`color` 可以是裸数字(广播成 RGB,alpha=1)、`[gray]`/`[gray,alpha]`/`[r,g,b]`/`[r,g,b,a]` 数组,或 `Color`。 |
